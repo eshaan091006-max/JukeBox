@@ -3,7 +3,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import MainNavigator from './src/navigation/MainNavigator';
 import { View, Text, StyleSheet, Platform } from 'react-native';
-import { isSupabaseConfigured } from './src/utils/supabase';
+import { supabase, isSupabaseConfigured } from './src/utils/supabase';
 import { usePlayerStore } from './src/store/usePlayerStore';
 import { makeRedirectUri } from 'expo-auth-session';
 
@@ -51,15 +51,49 @@ export default function App() {
     }
   };
 
+  const fetchSharedSpotifyToken = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('spotify_config')
+        .select('refresh_token')
+        .eq('id', 'developer')
+        .maybeSingle();
+
+      if (data && data.refresh_token) {
+        const details = {
+          grant_type: 'refresh_token',
+          refresh_token: data.refresh_token,
+          client_id: '1fb2261355cd4979af85a0c79a225fd2',
+        };
+
+        const formBody = Object.keys(details)
+          .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(details[key]))
+          .join('&');
+
+        const res = await fetch('https://accounts.spotify.com/api/token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: formBody,
+        });
+
+        const tokenData = await res.json();
+        if (tokenData.access_token) {
+          setSpotifyToken(tokenData.access_token);
+        }
+      }
+    } catch (e) {
+      console.log("Error loading shared Spotify token", e);
+    }
+  };
+
   const exchangeInProgress = useRef(false);
 
   useEffect(() => {
-    if (Platform.OS === 'web' && typeof window !== 'undefined' && window.localStorage) {
-      const savedToken = window.localStorage.getItem('spotify_token');
-      if (savedToken) {
-        setSpotifyToken(savedToken);
-      }
-    }
+    fetchSharedSpotifyToken();
+    const interval = setInterval(fetchSharedSpotifyToken, 45 * 60 * 1000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -67,15 +101,14 @@ export default function App() {
       const params = new URLSearchParams(window.location.search);
       const code = params.get('code');
       const savedVerifier = localStorage.getItem('spotify_code_verifier');
-      const savedToken = localStorage.getItem('spotify_token');
-      if (code && !spotifyToken && !savedToken && savedVerifier && !exchangeInProgress.current) {
+      if (code && savedVerifier && !exchangeInProgress.current) {
         exchangeInProgress.current = true;
         exchangeCodeForToken(code, savedVerifier);
         // Clear url params to avoid loops
         window.history.replaceState({}, document.title, window.location.pathname);
       }
     }
-  }, [spotifyToken]);
+  }, []);
 
   if (!isSupabaseConfigured) {
     return (

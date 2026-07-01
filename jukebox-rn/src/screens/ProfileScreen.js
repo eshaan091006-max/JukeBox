@@ -93,10 +93,19 @@ export default function ProfileScreen({ navigation }) {
       const data = await res.json();
       if (data.access_token) {
         setSpotifyToken(data.access_token);
+
+        if (data.refresh_token) {
+          try {
+            await supabase.from('spotify_config').upsert({ id: 'developer', refresh_token: data.refresh_token });
+          } catch (err) {
+            console.log("Failed to save shared Spotify config", err);
+          }
+        }
+
         if (Platform.OS === 'web') {
-          alert("Connected to Spotify Premium successfully!");
+          alert("Connected to Spotify Premium successfully! Sharing enabled for all accounts.");
         } else {
-          Alert.alert("Spotify Link", "Connected to Spotify Premium successfully!");
+          Alert.alert("Spotify Link", "Connected successfully! Sharing enabled for all accounts.");
         }
       } else {
         if (Platform.OS === 'web') {
