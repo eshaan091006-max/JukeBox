@@ -16,10 +16,12 @@ export default function App() {
       const details = {
         grant_type: 'authorization_code',
         code: code,
-        redirect_uri: makeRedirectUri({
-          scheme: 'jukebox',
-          useProxy: Platform.OS !== 'web',
-        }),
+        redirect_uri: Platform.OS === 'web' && typeof window !== 'undefined'
+          ? window.location.origin
+          : makeRedirectUri({
+              scheme: 'jukebox',
+              useProxy: true,
+            }),
         client_id: '1fb2261355cd4979af85a0c79a225fd2',
         code_verifier: codeVerifier,
       };

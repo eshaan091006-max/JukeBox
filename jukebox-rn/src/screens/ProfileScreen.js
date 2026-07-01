@@ -55,10 +55,12 @@ export default function ProfileScreen({ navigation }) {
         'streaming',
         'user-read-email',
       ],
-      redirectUri: makeRedirectUri({
-        scheme: 'jukebox',
-        useProxy: Platform.OS !== 'web',
-      }),
+      redirectUri: Platform.OS === 'web' && typeof window !== 'undefined'
+        ? window.location.origin
+        : makeRedirectUri({
+            scheme: 'jukebox',
+            useProxy: true,
+          }),
     },
     discovery
   );
