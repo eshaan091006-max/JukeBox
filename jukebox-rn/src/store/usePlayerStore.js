@@ -134,14 +134,18 @@ export const usePlayerStore = create((set, get) => {
       // Branch 1: If track contains a Spotify URI and token is linked, play via Spotify Connect REST
       if (spotifyToken && track.uri) {
         try {
-          await playSpotifyTrack(track.uri, spotifyToken);
-          set({
-            sound: null,
-            isPlaying: true,
-            currentTrack: track,
-          });
-          startSpotifyTicker();
-          return;
+          const success = await playSpotifyTrack(track.uri, spotifyToken);
+          if (success) {
+            set({
+              sound: null,
+              isPlaying: true,
+              currentTrack: track,
+            });
+            startSpotifyTicker();
+            return;
+          } else {
+            console.log("No active Spotify Connect device. Falling back to local preview streaming...");
+          }
         } catch (e) {
           console.log("Spotify playback request error", e);
         }

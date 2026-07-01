@@ -118,7 +118,7 @@ export default function SearchScreen() {
                 title: item.name,
                 author: item.artists.map(a => a.name).join(', '),
                 cover_url: item.album.images[0]?.url || 'https://picsum.photos/id/1025/100/100',
-                file_url: '',
+                file_url: item.preview_url || '',
                 uri: item.uri, // Spotify track URI (e.g. spotify:track:...)
                 duration_ms: item.duration_ms,
               }));

@@ -19,7 +19,7 @@ export async function playSpotifyTrack(spotifyUri, token, deviceId = null) {
       ? `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}` 
       : 'https://api.spotify.com/v1/me/player/play';
 
-    await fetch(url, {
+    const res = await fetch(url, {
       method: 'PUT',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -29,8 +29,10 @@ export async function playSpotifyTrack(spotifyUri, token, deviceId = null) {
         uris: [spotifyUri],
       }),
     });
+    return res.status === 204 || res.status === 200;
   } catch (e) {
     console.log("Error playing Spotify track", e);
+    return false;
   }
 }
 
