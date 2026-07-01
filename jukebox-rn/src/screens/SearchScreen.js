@@ -102,7 +102,7 @@ export default function SearchScreen() {
         }
         const searchSpotify = async () => {
           try {
-            const res = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(searchQuery)}&type=track&limit=15`, {
+            const res = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(searchQuery)}&type=track`, {
               headers: {
                 Authorization: `Bearer ${spotifyToken}`,
               },
