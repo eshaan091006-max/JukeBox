@@ -7,7 +7,6 @@ import { Audio } from 'expo-av';
 import { playClickSFX, playCoinSFX } from '../utils/sfxHelper';
 
 export default function HomeScreen({ navigation }) {
-  // Zustand audio store hooks
   const playTrack = usePlayerStore(state => state.playTrack);
   const sound = usePlayerStore(state => state.sound);
 
@@ -58,7 +57,6 @@ export default function HomeScreen({ navigation }) {
     initData();
   }, []);
 
-  // Pomodoro Timer Effect
   useEffect(() => {
     if (pomoActive) {
       timerInterval.current = setInterval(() => {
@@ -86,11 +84,11 @@ export default function HomeScreen({ navigation }) {
 
     if (pomoMode === 'STUDY') {
       setPomoMode('BREAK');
-      setPomoTimeLeft(5 * 60); // 5 min break
+      setPomoTimeLeft(5 * 60);
       Alert.alert("📚 STUDY SESSION COMPLETE", "LEVEL UP! Grab some water and take a 5-minute break.");
     } else {
       setPomoMode('STUDY');
-      setPomoTimeLeft(25 * 60); // 25 min study
+      setPomoTimeLeft(25 * 60);
       Alert.alert("☕ BREAK OVER", "Let's get back to gaming and focus. 25-minute timer start!");
     }
   };
@@ -177,7 +175,6 @@ export default function HomeScreen({ navigation }) {
     }
   };
 
-  // Play Snap clip for exactly 5 seconds, then delete it (self-destruct)
   const handleOpenSnap = async (snap) => {
     playClickSFX();
     setActiveSnap(snap);
@@ -194,14 +191,12 @@ export default function HomeScreen({ navigation }) {
       );
       setSnapSound(newSound);
 
-      // Progress bar ticker
       let elapsed = 0;
       snapProgressTimer.current = setInterval(() => {
         elapsed += 100;
         setSnapProgress(1 - (elapsed / 5000));
       }, 100);
 
-      // Auto self-destruct after 5 seconds
       snapTimer.current = setTimeout(async () => {
         await handleCloseAndDestroySnap(snap, newSound);
       }, 5000);
@@ -225,7 +220,6 @@ export default function HomeScreen({ navigation }) {
     setSnapPlayerVisible(false);
     setActiveSnap(null);
 
-    // Delete snap from Supabase (Disappearing snap!)
     try {
       await supabase.from('song_snaps').delete().eq('id', snap.id);
       fetchSongSnaps();
@@ -303,30 +297,35 @@ export default function HomeScreen({ navigation }) {
         <Text style={styles.rowTitle} numberOfLines={1}>{item.title.toUpperCase()}</Text>
         <Text style={styles.rowAuthor} numberOfLines={1}>{item.author.toUpperCase()}</Text>
       </View>
-      <Text style={styles.playIcon}>▶</Text>
+      <View style={styles.playIconContainer}>
+        <Text style={styles.playIcon}>▶</Text>
+      </View>
     </TouchableOpacity>
   );
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      <Text style={styles.logo}>BROWSE</Text>
+      <View style={styles.logoRow}>
+        <Text style={styles.logoText}>JUKE</Text>
+        <Text style={[styles.logoText, { color: themeColor }]}>BOX</Text>
+      </View>
 
       {/* Stories Section */}
-      <Text style={styles.sectionHeader}>DAILY STORIES</Text>
+      <Text style={styles.sectionHeader}>👾 DAILY VIBE STORIES</Text>
       <MusicStories />
 
       {/* Chiptune Pomodoro Study Timer Card */}
-      <View style={styles.pomoCard}>
+      <View style={[styles.pomoCard, { borderColor: themeColor }]}>
         <View style={styles.pomoHeader}>
-          <Text style={styles.pomoTitle}>📚 CHIPTUNE STUDY TIMER</Text>
-          <Text style={[styles.pomoBadge, { color: themeColor, borderColor: themeColor }]}>
+          <Text style={styles.pomoTitle}>⏳ FOCUS SESSION</Text>
+          <Text style={[styles.pomoBadge, { color: themeColor, borderColor: themeColor, backgroundColor: `${themeColor}15` }]}>
             {pomoMode}
           </Text>
         </View>
-        <Text style={styles.pomoTimerText}>{formatPomoTime(pomoTimeLeft)}</Text>
+        <Text style={[styles.pomoTimerText, { textShadowColor: themeColor }]}>{formatPomoTime(pomoTimeLeft)}</Text>
         <View style={styles.pomoActionRow}>
           <TouchableOpacity onPress={togglePomoTimer} style={[styles.pomoBtn, { backgroundColor: themeColor }]}>
-            <Text style={styles.pomoBtnText}>{pomoActive ? 'PAUSE TIMER' : 'START FOCUS'}</Text>
+            <Text style={styles.pomoBtnText}>{pomoActive ? '⏸ PAUSE FOCUS' : '⚡ START FOCUS'}</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={resetPomoTimer} style={styles.pomoResetBtn}>
             <Text style={styles.pomoResetText}>RESET</Text>
@@ -356,7 +355,7 @@ export default function HomeScreen({ navigation }) {
       )}
 
       {/* Discover Section */}
-      <Text style={styles.sectionHeader}>DISCOVER NEW SOUNDS</Text>
+      <Text style={styles.sectionHeader}>💿 DISCOVER TRACKS</Text>
       {isLoading ? (
         <ActivityIndicator size="small" color={themeColor} style={styles.loader} />
       ) : (
@@ -371,17 +370,17 @@ export default function HomeScreen({ navigation }) {
       {/* Pixel Blend Trigger Card */}
       <TouchableOpacity style={styles.blendCard} onPress={() => navigation.navigate('PixelBlend')}>
         <Text style={styles.blendIcon}>⚡</Text>
-        <Text style={styles.blendText}>CREATE A PIXEL BLEND</Text>
+        <Text style={styles.blendText}>COMPATIBILITY PIXEL BLEND</Text>
       </TouchableOpacity>
 
       {/* Favorites Section */}
-      <Text style={styles.sectionHeader}>YOUR FAVORITES</Text>
+      <Text style={styles.sectionHeader}>💖 YOUR FAVORITE SOUNDS</Text>
       {isFavoritesLoading ? (
         <ActivityIndicator size="small" color={themeColor} style={styles.loader} />
       ) : favorites.length === 0 ? (
         <View style={styles.emptyFavs}>
           <Text style={styles.emptyFavsText}>NO FAVORITES YET</Text>
-          <Text style={styles.emptyFavsSub}>HEART A SONG IN SEARCH TO ADD</Text>
+          <Text style={styles.emptyFavsSub}>HEART SONGS ON THE SEARCH TAB TO ADD</Text>
         </View>
       ) : (
         <FlatList
@@ -394,7 +393,7 @@ export default function HomeScreen({ navigation }) {
 
       {/* Jam Lobby Trigger Button */}
       <TouchableOpacity style={[styles.jamBtn, { backgroundColor: themeColor }]} onPress={() => setJamModalVisible(true)}>
-        <Text style={styles.jamBtnText}>START JAM SESSION</Text>
+        <Text style={styles.jamBtnText}>🎮 CREATE / JOIN PARTY JAM</Text>
       </TouchableOpacity>
 
       {/* Jam Input Dialog Modal */}
@@ -406,12 +405,12 @@ export default function HomeScreen({ navigation }) {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>JAM SESSION</Text>
+            <Text style={styles.modalTitle}>PARTY JAM SESSION</Text>
             <TouchableOpacity style={[styles.modalCreateBtn, { backgroundColor: themeColor }]} onPress={handleCreateJam}>
-              <Text style={styles.modalCreateText}>CREATE ROOM</Text>
+              <Text style={styles.modalCreateText}>CREATE NEW LOBBY</Text>
             </TouchableOpacity>
 
-            <Text style={styles.modalOr}>OR JOIN EXISTING:</Text>
+            <Text style={styles.modalOr}>OR JOIN LOBBY BY CODE</Text>
             <TextInput
               placeholder="CODE"
               placeholderTextColor="grey"
@@ -427,7 +426,7 @@ export default function HomeScreen({ navigation }) {
                 <Text style={styles.cancelText}>CANCEL</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={handleJoinJam}>
-                <Text style={[styles.joinText, { color: themeColor }]}>JOIN</Text>
+                <Text style={[styles.joinText, { color: themeColor }]}>JOIN ROOM</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -443,7 +442,6 @@ export default function HomeScreen({ navigation }) {
       >
         {activeSnap && (
           <View style={styles.snapOverlay}>
-            {/* Top progress countdown ticker bar */}
             <View style={styles.snapProgressContainer}>
               <View style={[styles.snapProgressFill, { width: `${snapProgress * 100}%` }]} />
             </View>
@@ -473,37 +471,43 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0a0a0a',
-    paddingHorizontal: 16,
+    backgroundColor: '#050505',
+    paddingHorizontal: 20,
   },
   contentContainer: {
     paddingBottom: 150,
   },
-  logo: {
-    color: '#ffffff',
-    fontSize: 28,
-    fontWeight: 'bold',
-    letterSpacing: 2,
-    marginTop: 40,
+  logoRow: {
+    flexDirection: 'row',
+    marginTop: 48,
     marginBottom: 20,
+  },
+  logoText: {
+    fontSize: 32,
+    fontWeight: '900',
+    letterSpacing: 2,
+    color: '#ffffff',
   },
   sectionHeader: {
     color: 'grey',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: 'bold',
-    letterSpacing: 1.5,
-    marginVertical: 10,
+    letterSpacing: 2,
+    marginVertical: 12,
   },
   loader: {
     marginVertical: 16,
   },
   pomoCard: {
-    backgroundColor: '#161616',
+    backgroundColor: '#0d0d0d',
     borderRadius: 16,
-    padding: 20,
+    padding: 24,
     marginBottom: 24,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 2,
+    shadowColor: '#ff00ff',
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 0 },
   },
   pomoHeader: {
     flexDirection: 'row',
@@ -514,33 +518,36 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 12,
     fontWeight: 'bold',
-    letterSpacing: 1,
+    letterSpacing: 1.5,
   },
   pomoBadge: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: 'bold',
     borderWidth: 1,
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 4,
+    letterSpacing: 1,
   },
   pomoTimerText: {
     color: '#ffffff',
-    fontSize: 48,
-    fontWeight: 'bold',
+    fontSize: 56,
+    fontWeight: '900',
     textAlign: 'center',
     marginVertical: 16,
-    letterSpacing: 2,
+    letterSpacing: 3,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
   },
   pomoActionRow: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 12,
+    gap: 16,
     alignItems: 'center',
   },
   pomoBtn: {
     borderRadius: 8,
-    paddingHorizontal: 24,
+    paddingHorizontal: 28,
     paddingVertical: 12,
   },
   pomoBtnText: {
@@ -551,109 +558,144 @@ const styles = StyleSheet.create({
   },
   pomoResetBtn: {
     padding: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 8,
   },
   pomoResetText: {
     color: 'grey',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: 'bold',
   },
   songRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 10,
+    backgroundColor: 'rgba(255,255,255,0.02)',
+    padding: 12,
+    borderRadius: 12,
+    marginVertical: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.04)',
   },
   rowCover: {
-    width: 50,
-    height: 50,
-    borderRadius: 4,
+    width: 48,
+    height: 48,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
   rowMeta: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: 14,
   },
   rowTitle: {
     color: '#ffffff',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
   },
   rowAuthor: {
     color: 'grey',
-    fontSize: 13,
+    fontSize: 12,
     marginTop: 2,
   },
+  playIconContainer: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   playIcon: {
-    color: 'grey',
-    fontSize: 16,
-    paddingHorizontal: 8,
+    color: '#ff00ff',
+    fontSize: 11,
+    marginLeft: 2,
   },
   blendCard: {
     height: 52,
-    backgroundColor: '#1c1c1c',
+    backgroundColor: '#0d0d0d',
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#3a3a3a',
+    borderWidth: 1.5,
+    borderColor: '#00e5ff',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 24,
+    marginVertical: 20,
+    shadowColor: '#00e5ff',
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 0 },
   },
   blendIcon: {
-    color: 'amber',
-    fontSize: 18,
+    color: '#00e5ff',
+    fontSize: 16,
     marginRight: 8,
   },
   blendText: {
     color: '#ffffff',
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: 'bold',
+    letterSpacing: 1.5,
   },
   emptyFavs: {
     alignItems: 'center',
-    paddingVertical: 24,
+    paddingVertical: 32,
+    backgroundColor: 'rgba(255,255,255,0.01)',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.03)',
   },
   emptyFavsText: {
     color: 'grey',
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: 'bold',
   },
   emptyFavsSub: {
     color: 'grey',
-    fontSize: 11,
+    fontSize: 10,
     marginTop: 4,
+    textAlign: 'center',
   },
   jamBtn: {
-    height: 60,
+    height: 54,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 30,
+    shadowColor: '#ff00ff',
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
   },
   jamBtnText: {
     color: '#000000',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
+    letterSpacing: 1,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.8)',
+    backgroundColor: 'rgba(0,0,0,0.85)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContent: {
-    width: '80%',
-    backgroundColor: '#1e1e1e',
-    borderRadius: 12,
+    width: '85%',
+    backgroundColor: '#0d0d0d',
+    borderRadius: 16,
     padding: 24,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ff00ff',
   },
   modalTitle: {
     color: '#ff00ff',
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 20,
+    letterSpacing: 1.5,
   },
   modalCreateBtn: {
-    height: 50,
+    height: 48,
     width: '100%',
     borderRadius: 8,
     alignItems: 'center',
@@ -662,35 +704,40 @@ const styles = StyleSheet.create({
   modalCreateText: {
     color: '#000000',
     fontWeight: 'bold',
+    fontSize: 12,
+    letterSpacing: 1,
   },
   modalOr: {
     color: 'grey',
-    fontSize: 11,
-    marginVertical: 12,
+    fontSize: 10,
+    marginVertical: 16,
+    fontWeight: 'bold',
   },
   modalInput: {
-    height: 50,
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    height: 48,
+    backgroundColor: 'rgba(255,255,255,0.06)',
     width: '100%',
     borderRadius: 8,
     color: '#ffffff',
     textAlign: 'center',
-    fontSize: 20,
-    letterSpacing: 4,
+    fontSize: 18,
+    letterSpacing: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
   modalActions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
-    marginTop: 20,
+    marginTop: 24,
     paddingHorizontal: 8,
   },
   cancelText: {
     color: 'grey',
-    fontSize: 14,
+    fontSize: 13,
   },
   joinText: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: 'bold',
   },
   snapsFeedSection: {
@@ -701,33 +748,33 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   snapRing: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    borderWidth: 3,
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    borderWidth: 2,
     borderColor: '#ffd700',
     padding: 2,
   },
   snapCover: {
     width: '100%',
     height: '100%',
-    borderRadius: 28,
+    borderRadius: 27,
   },
   snapSender: {
     color: 'grey',
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: 'bold',
-    marginTop: 4,
+    marginTop: 6,
   },
   snapOverlay: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: '#050505',
     paddingHorizontal: 24,
     paddingTop: 48,
   },
   snapProgressContainer: {
     height: 4,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(255,255,255,0.15)',
     width: '100%',
     borderRadius: 2,
     overflow: 'hidden',
@@ -744,7 +791,7 @@ const styles = StyleSheet.create({
   snapCloseText: {
     color: '#ffffff',
     fontWeight: 'bold',
-    fontSize: 12,
+    fontSize: 11,
   },
   snapPlayerContent: {
     flex: 1,
@@ -760,7 +807,7 @@ const styles = StyleSheet.create({
     borderColor: '#ffd700',
   },
   snapMsgBubble: {
-    backgroundColor: 'rgba(255, 215, 0, 0.15)',
+    backgroundColor: 'rgba(255, 215, 0, 0.08)',
     borderWidth: 1,
     borderColor: '#ffd700',
     borderRadius: 8,
@@ -772,24 +819,24 @@ const styles = StyleSheet.create({
   snapMsgSender: {
     color: '#ffd700',
     fontWeight: 'bold',
-    fontSize: 12,
+    fontSize: 11,
     marginBottom: 4,
   },
   snapMsgText: {
     color: '#ffffff',
     fontWeight: 'bold',
-    fontSize: 14,
+    fontSize: 13,
     letterSpacing: 0.5,
   },
   snapPlayerTitle: {
     color: '#b3b3b3',
     fontWeight: 'bold',
-    fontSize: 14,
+    fontSize: 13,
     marginTop: 24,
   },
   snapNotice: {
     color: 'grey',
-    fontSize: 10,
+    fontSize: 9,
     marginTop: 40,
     letterSpacing: 1,
   },

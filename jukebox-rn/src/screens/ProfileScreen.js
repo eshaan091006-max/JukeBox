@@ -27,7 +27,7 @@ export default function ProfileScreen({ navigation }) {
 
   const [userId, setUserId] = useState(null);
   const [email, setEmail] = useState('');
-
+  
   // Custom Profile state
   const [nickname, setNickname] = useState('RETRO USER');
   const [themeColor, setThemeColor] = useState('#ff00ff');
@@ -70,10 +70,12 @@ export default function ProfileScreen({ navigation }) {
       const details = {
         grant_type: 'authorization_code',
         code: code,
-        redirect_uri: makeRedirectUri({
-          scheme: 'jukebox',
-          useProxy: Platform.OS !== 'web',
-        }),
+        redirect_uri: Platform.OS === 'web' && typeof window !== 'undefined'
+          ? window.location.origin
+          : makeRedirectUri({
+              scheme: 'jukebox',
+              useProxy: true,
+            }),
         client_id: '1fb2261355cd4979af85a0c79a225fd2',
         code_verifier: codeVerifier,
       };
@@ -134,14 +136,13 @@ export default function ProfileScreen({ navigation }) {
   }, [response, request]);
 
 
-
   useEffect(() => {
     const fetchUserAndProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUserId(user.id);
         setEmail(user.email);
-
+        
         // Fetch custom profile details from db
         const { data, error } = await supabase
           .from('profiles')
@@ -248,7 +249,7 @@ export default function ProfileScreen({ navigation }) {
   return (
     <View style={styles.container}>
       {/* Header Profile Info card */}
-      <View style={styles.profileHeaderCard}>
+      <View style={[styles.profileHeaderCard, { borderColor: themeColor, shadowColor: themeColor }]}>
         <View style={[styles.avatarBorder, { borderColor: themeColor }]}>
           <Text style={styles.avatarText}>👤</Text>
         </View>
@@ -256,7 +257,7 @@ export default function ProfileScreen({ navigation }) {
         <Text style={styles.email}>{email}</Text>
 
         <View style={styles.profileActionsRow}>
-          <TouchableOpacity
+          <TouchableOpacity 
             style={[styles.editBtn, { backgroundColor: themeColor }]}
             onPress={() => {
               setInputNickname(nickname);
@@ -268,7 +269,7 @@ export default function ProfileScreen({ navigation }) {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.spotifyBtn, { borderColor: spotifyToken ? '#ff00ff' : 'grey' }]}
+            style={[styles.spotifyBtn, { borderColor: spotifyToken ? '#1DB954' : 'grey' }]}
             disabled={!request}
             onPress={() => {
               playClickSFX();
@@ -337,7 +338,7 @@ export default function ProfileScreen({ navigation }) {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>EDIT PIXEL PROFILE</Text>
-
+            
             <Text style={styles.modalLabel}>NICKNAME</Text>
             <TextInput
               placeholder="ENTER NICKNAME"
@@ -380,18 +381,20 @@ export default function ProfileScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0a0a0a',
-    paddingHorizontal: 24,
+    backgroundColor: '#050505',
+    paddingHorizontal: 20,
     paddingTop: 48,
   },
   profileHeaderCard: {
     alignItems: 'center',
-    backgroundColor: '#1e1e1e',
+    backgroundColor: '#0d0d0d',
     borderRadius: 16,
     padding: 24,
     marginBottom: 32,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    borderWidth: 2,
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 0 },
   },
   avatarBorder: {
     width: 80,
@@ -401,20 +404,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: 'rgba(255,255,255,0.03)',
   },
   avatarText: {
     fontSize: 32,
   },
   nickname: {
     color: '#ffffff',
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: 'bold',
-    letterSpacing: 1,
+    letterSpacing: 1.5,
   },
   email: {
     color: 'grey',
-    fontSize: 13,
+    fontSize: 12,
     marginTop: 4,
     marginBottom: 20,
   },
@@ -425,13 +428,13 @@ const styles = StyleSheet.create({
   },
   editBtn: {
     borderRadius: 8,
-    paddingHorizontal: 16,
+    paddingHorizontal: 18,
     paddingVertical: 10,
   },
   editBtnText: {
     color: '#000000',
     fontWeight: 'bold',
-    fontSize: 12,
+    fontSize: 11,
     letterSpacing: 1,
   },
   spotifyBtn: {
@@ -447,9 +450,9 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: 'grey',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: 'bold',
-    letterSpacing: 1.5,
+    letterSpacing: 2,
     marginBottom: 16,
   },
   loader: {
@@ -459,16 +462,20 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingBottom: 60,
+    paddingVertical: 32,
+    backgroundColor: 'rgba(255,255,255,0.01)',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.03)',
   },
   emptyText: {
     color: 'grey',
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: 'bold',
   },
   emptySub: {
     color: 'grey',
-    fontSize: 11,
+    fontSize: 10,
     marginTop: 4,
     textAlign: 'center',
   },
@@ -478,7 +485,12 @@ const styles = StyleSheet.create({
   songRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 8,
+    backgroundColor: 'rgba(255,255,255,0.02)',
+    padding: 12,
+    borderRadius: 12,
+    marginVertical: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.04)',
   },
   songClickable: {
     flex: 1,
@@ -486,12 +498,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cover: {
-    width: 48,
-    height: 48,
-    borderRadius: 4,
+    width: 44,
+    height: 44,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
   meta: {
-    marginLeft: 12,
+    marginLeft: 14,
     flex: 1,
   },
   title: {
@@ -505,10 +519,11 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   deleteBtn: {
-    padding: 8,
-    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderWidth: 1.5,
     borderColor: '#ff4d4d',
-    borderRadius: 4,
+    borderRadius: 8,
   },
   deleteIcon: {
     color: '#ff4d4d',
@@ -522,19 +537,20 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     color: '#ff4d4d',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: 'bold',
+    letterSpacing: 1,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.8)',
+    backgroundColor: 'rgba(0,0,0,0.85)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContent: {
-    width: '80%',
-    backgroundColor: '#1e1e1e',
-    borderRadius: 12,
+    width: '85%',
+    backgroundColor: '#0d0d0d',
+    borderRadius: 16,
     padding: 24,
     borderWidth: 1,
     borderColor: '#ff00ff',
@@ -544,23 +560,26 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
+    letterSpacing: 1.5,
   },
   modalLabel: {
     color: 'grey',
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: 'bold',
     marginBottom: 8,
     letterSpacing: 1,
   },
   modalInput: {
     height: 48,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: 'rgba(255,255,255,0.06)',
     borderRadius: 8,
     color: '#ffffff',
     paddingHorizontal: 12,
     fontSize: 14,
     marginBottom: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
   colorRow: {
     flexDirection: 'row',
@@ -569,23 +588,24 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   colorCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     borderWidth: 2,
   },
   modalActions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 8,
+    marginTop: 10,
   },
   cancelText: {
     color: 'grey',
-    fontSize: 14,
+    fontSize: 13,
   },
   saveText: {
     color: '#ff00ff',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: 'bold',
   },
 });

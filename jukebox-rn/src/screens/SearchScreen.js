@@ -94,7 +94,6 @@ export default function SearchScreen() {
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-      // 1. If Spotify integration is linked, query Spotify's catalog search endpoint
       if (spotifyToken) {
         if (!searchQuery.trim()) {
           setSongs([]);
@@ -114,12 +113,12 @@ export default function SearchScreen() {
             }
             if (data && data.tracks && data.tracks.items) {
               const mapped = data.tracks.items.map(item => ({
-                id: item.id, // Spotify alphanumeric string ID
+                id: item.id,
                 title: item.name,
                 author: item.artists.map(a => a.name).join(', '),
                 cover_url: item.album.images[0]?.url || 'https://picsum.photos/id/1025/100/100',
                 file_url: item.preview_url || '',
-                uri: item.uri, // Spotify track URI (e.g. spotify:track:...)
+                uri: item.uri,
                 duration_ms: item.duration_ms,
               }));
               setSongs(mapped);
@@ -133,7 +132,6 @@ export default function SearchScreen() {
         return;
       }
 
-      // 2. Otherwise, fallback to offline filter Supabase songs catalog
       if (!searchQuery.trim()) {
         setSongs(allSongs);
         return;
@@ -173,7 +171,10 @@ export default function SearchScreen() {
             {isLiked ? '♥' : '♡'}
           </Text>
         </TouchableOpacity>
-        <Text style={styles.playIcon}>▶</Text>
+        
+        <View style={styles.playIconContainer}>
+          <Text style={styles.playIcon}>▶</Text>
+        </View>
       </TouchableOpacity>
     );
   };
@@ -182,7 +183,7 @@ export default function SearchScreen() {
     <View style={styles.container}>
       <View style={styles.searchBarContainer}>
         <TextInput
-          placeholder={spotifyToken ? "SEARCH LIVE SPOTIFY CATALOG..." : "SEARCH..."}
+          placeholder={spotifyToken ? "🔍 SEARCH 100M+ SPOTIFY TRACKS..." : "🔍 SEARCH LOCAL CATALOG..."}
           placeholderTextColor="grey"
           style={styles.searchInput}
           value={searchQuery}
@@ -212,22 +213,23 @@ export default function SearchScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0a0a0a',
-    paddingHorizontal: 16,
+    backgroundColor: '#050505',
+    paddingHorizontal: 20,
   },
   searchBarContainer: {
     marginTop: 48,
-    marginBottom: 16,
+    marginBottom: 20,
   },
   searchInput: {
-    height: 50,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 10,
+    height: 52,
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    borderRadius: 12,
     paddingHorizontal: 16,
     color: '#ffffff',
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    fontSize: 14,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.06)',
+    letterSpacing: 0.5,
   },
   loader: {
     marginTop: 40,
@@ -238,39 +240,53 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: 'rgba(255,255,255,0.02)',
+    padding: 12,
+    borderRadius: 12,
+    marginVertical: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.04)',
   },
   cover: {
-    width: 56,
-    height: 56,
-    borderRadius: 4,
+    width: 48,
+    height: 48,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
   meta: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: 14,
   },
   title: {
     color: '#ffffff',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
   },
   author: {
     color: 'grey',
-    fontSize: 13,
+    fontSize: 12,
     marginTop: 2,
   },
   heartBtn: {
-    padding: 10,
+    padding: 8,
   },
   heartIcon: {
-    fontSize: 24,
+    fontSize: 20,
+  },
+  playIconContainer: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 4,
   },
   playIcon: {
-    color: 'grey',
-    fontSize: 14,
-    marginLeft: 8,
+    color: '#ff00ff',
+    fontSize: 11,
+    marginLeft: 2,
   },
   emptyContainer: {
     flex: 1,
@@ -280,12 +296,12 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     color: 'grey',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
   },
   emptySub: {
     color: 'grey',
-    fontSize: 12,
+    fontSize: 11,
     marginTop: 4,
   },
 });
