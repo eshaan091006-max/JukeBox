@@ -21,7 +21,6 @@ export default function FullPlayer({ onClose }) {
   const duration = usePlayerStore(state => state.duration);
   const seek = usePlayerStore(state => state.seek);
   
-  // Zustand State hooks
   const lyrics = usePlayerStore(state => state.lyrics);
   const cachedSongIds = usePlayerStore(state => state.cachedSongIds);
   const toggleDownloadTrack = usePlayerStore(state => state.toggleDownloadTrack);
@@ -60,7 +59,7 @@ export default function FullPlayer({ onClose }) {
         await Haptics.impactAsync(style);
       }
     } catch (e) {
-      // Ignored on Web
+      // Ignored
     }
   };
 
@@ -501,7 +500,7 @@ export default function FullPlayer({ onClose }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0a0a0a',
+    backgroundColor: '#050505',
     paddingHorizontal: 24,
   },
   header: {
@@ -541,15 +540,17 @@ const styles = StyleSheet.create({
   cover: {
     width: width * 0.68,
     height: width * 0.68,
-    borderRadius: 12,
-    borderWidth: 2,
+    borderRadius: 16,
+    borderWidth: 2.5,
     borderColor: '#ff00ff',
   },
   lyricsContainer: {
     flex: 1,
-    backgroundColor: 'rgba(255,255,255,0.03)',
+    backgroundColor: 'rgba(255,255,255,0.02)',
     borderRadius: 12,
     padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.04)',
   },
   lyricsListContent: {
     paddingVertical: height * 0.15,
@@ -569,9 +570,11 @@ const styles = StyleSheet.create({
   },
   queueContainer: {
     flex: 1,
-    backgroundColor: 'rgba(255,255,255,0.03)',
+    backgroundColor: 'rgba(255,255,255,0.02)',
     borderRadius: 12,
     padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.04)',
   },
   queueHeader: {
     color: '#ff00ff',
@@ -637,10 +640,10 @@ const styles = StyleSheet.create({
     marginVertical: 8,
   },
   eqBtn: {
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderRadius: 14,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+    paddingHorizontal: 14,
+    paddingVertical: 5,
   },
   eqBtnText: {
     fontSize: 10,
@@ -686,12 +689,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   projectorBtn: {
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 6,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: 'rgba(255,255,255,0.08)',
   },
   projectorText: {
     color: '#ffffff',
@@ -699,10 +702,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   downloadBtn: {
-    padding: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: 'grey',
+    borderColor: 'rgba(255,255,255,0.15)',
   },
   downloadIcon: {
     fontSize: 10,
@@ -712,15 +716,15 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   progressBarBackground: {
-    height: 4,
-    backgroundColor: '#3e3e3e',
-    borderRadius: 2,
+    height: 5,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 2.5,
     width: '100%',
   },
   progressBarFill: {
     height: '100%',
     backgroundColor: '#ff00ff',
-    borderRadius: 2,
+    borderRadius: 2.5,
   },
   timeRow: {
     flexDirection: 'row',
@@ -752,6 +756,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#ff00ff',
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#ff00ff',
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 0 },
   },
   playText: {
     color: '#000000',
@@ -761,14 +769,14 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.8)',
+    backgroundColor: 'rgba(0,0,0,0.85)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContent: {
-    width: '80%',
-    backgroundColor: '#1e1e1e',
-    borderRadius: 12,
+    width: '85%',
+    backgroundColor: '#0d0d0d',
+    borderRadius: 16,
     padding: 24,
     alignItems: 'center',
     borderWidth: 1,
@@ -787,13 +795,15 @@ const styles = StyleSheet.create({
   },
   modalInput: {
     height: 48,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: 'rgba(255,255,255,0.06)',
     width: '100%',
     borderRadius: 8,
     color: '#ffffff',
     paddingHorizontal: 12,
     fontSize: 14,
     marginBottom: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
   modalActions: {
     flexDirection: 'row',
