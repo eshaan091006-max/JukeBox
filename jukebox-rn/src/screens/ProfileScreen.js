@@ -122,17 +122,7 @@ export default function ProfileScreen({ navigation }) {
     }
   }, [response, request]);
 
-  useEffect(() => {
-    if (Platform.OS === 'web' && typeof window !== 'undefined' && window.location) {
-      const params = new URLSearchParams(window.location.search);
-      const code = params.get('code');
-      const savedVerifier = localStorage.getItem('spotify_code_verifier');
-      if (code && !spotifyToken && savedVerifier) {
-        exchangeCodeForToken(code, savedVerifier);
-        window.history.replaceState({}, document.title, window.location.pathname);
-      }
-    }
-  }, [spotifyToken]);
+
 
   useEffect(() => {
     const fetchUserAndProfile = async () => {

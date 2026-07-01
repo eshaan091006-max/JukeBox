@@ -1,11 +1,67 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import MainNavigator from './src/navigation/MainNavigator';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 import { isSupabaseConfigured } from './src/utils/supabase';
+import { usePlayerStore } from './src/store/usePlayerStore';
+import { makeRedirectUri } from 'expo-auth-session';
 
 export default function App() {
+  const spotifyToken = usePlayerStore(state => state.spotifyToken);
+  const setSpotifyToken = usePlayerStore(state => state.setSpotifyToken);
+
+  const exchangeCodeForToken = async (code, codeVerifier) => {
+    try {
+      const details = {
+        grant_type: 'authorization_code',
+        code: code,
+        redirect_uri: makeRedirectUri({
+          scheme: 'jukebox',
+          useProxy: Platform.OS !== 'web',
+        }),
+        client_id: '1fb2261355cd4979af85a0c79a225fd2',
+        code_verifier: codeVerifier,
+      };
+
+      const formBody = Object.keys(details)
+        .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(details[key]))
+        .join('&');
+
+      const res = await fetch('https://accounts.spotify.com/api/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formBody,
+      });
+
+      const data = await res.json();
+      if (data.access_token) {
+        setSpotifyToken(data.access_token);
+        alert("Connected to Spotify Premium successfully!");
+      } else {
+        alert("Spotify Exchange failed: " + JSON.stringify(data));
+      }
+    } catch (e) {
+      console.log("Token exchange error at root", e);
+      alert("Spotify Exchange request failed: " + e.message);
+    }
+  };
+
+  useEffect(() => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined' && window.location) {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code');
+      const savedVerifier = localStorage.getItem('spotify_code_verifier');
+      if (code && !spotifyToken && savedVerifier) {
+        exchangeCodeForToken(code, savedVerifier);
+        // Clear url params to avoid loops
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+  }, [spotifyToken]);
+
   if (!isSupabaseConfigured) {
     return (
       <View style={styles.fallbackContainer}>
