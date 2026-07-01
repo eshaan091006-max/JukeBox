@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList, Modal, TextInput, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList, Modal, TextInput, Alert, ActivityIndicator, Platform } from 'react-native';
 import { supabase } from '../utils/supabase';
 import { usePlayerStore } from '../store/usePlayerStore';
 import { playClickSFX } from '../utils/sfxHelper';
@@ -55,7 +55,7 @@ export default function ProfileScreen({ navigation }) {
       ],
       redirectUri: makeRedirectUri({
         scheme: 'jukebox',
-        useProxy: true,
+        useProxy: Platform.OS !== 'web',
       }),
     },
     discovery
@@ -197,7 +197,7 @@ export default function ProfileScreen({ navigation }) {
             disabled={!request}
             onPress={() => {
               playClickSFX();
-              console.log("👉 COPY THIS EXACT URI TO YOUR SPOTIFY DEVELOPER DASHBOARD REDIRECTS:", makeRedirectUri({ scheme: 'jukebox', useProxy: true }));
+              console.log("👉 COPY THIS EXACT URI TO YOUR SPOTIFY DEVELOPER DASHBOARD REDIRECTS:", makeRedirectUri({ scheme: 'jukebox', useProxy: Platform.OS !== 'web' }));
               promptAsync();
             }}
           >
