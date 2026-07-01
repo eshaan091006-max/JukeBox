@@ -267,7 +267,7 @@ export default function ProfileScreen({ navigation }) {
                 localStorage.setItem('spotify_code_verifier', request.codeVerifier);
               }
               console.log("👉 COPY THIS EXACT URI TO YOUR SPOTIFY DEVELOPER DASHBOARD REDIRECTS:", makeRedirectUri({ scheme: 'jukebox', useProxy: Platform.OS !== 'web' }));
-              promptAsync();
+              promptAsync({ windowName: Platform.OS === 'web' ? '_self' : '_blank' });
             }}
           >
             <Text style={[styles.spotifyBtnText, { color: spotifyToken ? '#1DB954' : 'grey' }]}>

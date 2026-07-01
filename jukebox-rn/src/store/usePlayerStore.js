@@ -70,7 +70,16 @@ export const usePlayerStore = create((set, get) => {
     spotifyToken: null,
     visualizerPreset: 'CHILL WAVE',
 
-    setSpotifyToken: (token) => set({ spotifyToken: token }),
+    setSpotifyToken: (token) => {
+      set({ spotifyToken: token });
+      if (typeof window !== 'undefined' && window.localStorage) {
+        if (token) {
+          window.localStorage.setItem('spotify_token', token);
+        } else {
+          window.localStorage.removeItem('spotify_token');
+        }
+      }
+    },
     setVisualizerPreset: (preset) => set({ visualizerPreset: preset }),
 
     // Load list of locally downloaded song IDs

@@ -54,11 +54,21 @@ export default function App() {
   const exchangeInProgress = useRef(false);
 
   useEffect(() => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined' && window.localStorage) {
+      const savedToken = window.localStorage.getItem('spotify_token');
+      if (savedToken) {
+        setSpotifyToken(savedToken);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
     if (Platform.OS === 'web' && typeof window !== 'undefined' && window.location) {
       const params = new URLSearchParams(window.location.search);
       const code = params.get('code');
       const savedVerifier = localStorage.getItem('spotify_code_verifier');
-      if (code && !spotifyToken && savedVerifier && !exchangeInProgress.current) {
+      const savedToken = localStorage.getItem('spotify_token');
+      if (code && !spotifyToken && !savedToken && savedVerifier && !exchangeInProgress.current) {
         exchangeInProgress.current = true;
         exchangeCodeForToken(code, savedVerifier);
         // Clear url params to avoid loops
