@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import MainNavigator from './src/navigation/MainNavigator';
@@ -49,12 +49,15 @@ export default function App() {
     }
   };
 
+  const exchangeInProgress = useRef(false);
+
   useEffect(() => {
     if (Platform.OS === 'web' && typeof window !== 'undefined' && window.location) {
       const params = new URLSearchParams(window.location.search);
       const code = params.get('code');
       const savedVerifier = localStorage.getItem('spotify_code_verifier');
-      if (code && !spotifyToken && savedVerifier) {
+      if (code && !spotifyToken && savedVerifier && !exchangeInProgress.current) {
+        exchangeInProgress.current = true;
         exchangeCodeForToken(code, savedVerifier);
         // Clear url params to avoid loops
         window.history.replaceState({}, document.title, window.location.pathname);
