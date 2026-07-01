@@ -46,7 +46,8 @@ export default function ProfileScreen({ navigation }) {
   const [request, response, promptAsync] = useAuthRequest(
     {
       clientId: '1fb2261355cd4979af85a0c79a225fd2',
-      responseType: ResponseType.Token,
+      responseType: ResponseType.Code,
+      usePKCE: true,
       scopes: [
         'user-read-currently-playing',
         'user-read-playback-state',
@@ -62,29 +63,62 @@ export default function ProfileScreen({ navigation }) {
     discovery
   );
 
+  const exchangeCodeForToken = async (code, codeVerifier) => {
+    try {
+      const details = {
+        grant_type: 'authorization_code',
+        code: code,
+        redirect_uri: makeRedirectUri({
+          scheme: 'jukebox',
+          useProxy: Platform.OS !== 'web',
+        }),
+        client_id: '1fb2261355cd4979af85a0c79a225fd2',
+        code_verifier: codeVerifier,
+      };
+
+      const formBody = Object.keys(details)
+        .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(details[key]))
+        .join('&');
+
+      const res = await fetch('https://accounts.spotify.com/api/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formBody,
+      });
+
+      const data = await res.json();
+      if (data.access_token) {
+        setSpotifyToken(data.access_token);
+        if (Platform.OS === 'web') {
+          alert("Connected to Spotify Premium successfully!");
+        } else {
+          Alert.alert("Spotify Link", "Connected to Spotify Premium successfully!");
+        }
+      }
+    } catch (e) {
+      console.log("Token exchange error", e);
+    }
+  };
+
   useEffect(() => {
     if (response?.type === 'success') {
-      const { access_token } = response.params;
-      setSpotifyToken(access_token);
-      if (Platform.OS === 'web') {
-        alert("Connected to Spotify Premium successfully!");
-      } else {
-        Alert.alert("Spotify Link", "Connected to Spotify Premium successfully!");
+      const { code } = response.params;
+      if (code && request?.codeVerifier) {
+        exchangeCodeForToken(code, request.codeVerifier);
       }
     }
-  }, [response]);
+  }, [response, request]);
 
   useEffect(() => {
     if (Platform.OS === 'web' && typeof window !== 'undefined' && window.location) {
       const params = new URLSearchParams(window.location.search);
-      const code = params.get('code') || params.get('access_token');
-      const hashParams = new URLSearchParams(window.location.hash.substring(1));
-      const token = hashParams.get('access_token') || hashParams.get('code') || code;
-
-      if (token && !spotifyToken) {
-        setSpotifyToken(token);
+      const code = params.get('code');
+      const savedVerifier = localStorage.getItem('spotify_code_verifier');
+      if (code && !spotifyToken && savedVerifier) {
+        exchangeCodeForToken(code, savedVerifier);
         window.history.replaceState({}, document.title, window.location.pathname);
-        alert("Connected to Spotify Premium successfully!");
       }
     }
   }, [spotifyToken]);
@@ -168,7 +202,7 @@ export default function ProfileScreen({ navigation }) {
     const performLogout = async () => {
       try {
         await supabase.auth.signOut();
-        navigation.getParent()?.replace('Login');
+        navigation.navigate('Login');
       } catch (e) {
         console.log("Logout error", e);
       }
@@ -226,6 +260,9 @@ export default function ProfileScreen({ navigation }) {
             disabled={!request}
             onPress={() => {
               playClickSFX();
+              if (request?.codeVerifier && Platform.OS === 'web') {
+                localStorage.setItem('spotify_code_verifier', request.codeVerifier);
+              }
               console.log("👉 COPY THIS EXACT URI TO YOUR SPOTIFY DEVELOPER DASHBOARD REDIRECTS:", makeRedirectUri({ scheme: 'jukebox', useProxy: Platform.OS !== 'web' }));
               promptAsync();
             }}
