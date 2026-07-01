@@ -65,9 +65,28 @@ export default function ProfileScreen({ navigation }) {
     if (response?.type === 'success') {
       const { access_token } = response.params;
       setSpotifyToken(access_token);
-      Alert.alert("Spotify Link", "Connected to Spotify Premium successfully!");
+      if (Platform.OS === 'web') {
+        alert("Connected to Spotify Premium successfully!");
+      } else {
+        Alert.alert("Spotify Link", "Connected to Spotify Premium successfully!");
+      }
     }
   }, [response]);
+
+  useEffect(() => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined' && window.location) {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code') || params.get('access_token');
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const token = hashParams.get('access_token') || hashParams.get('code') || code;
+
+      if (token && !spotifyToken) {
+        setSpotifyToken(token);
+        window.history.replaceState({}, document.title, window.location.pathname);
+        alert("Connected to Spotify Premium successfully!");
+      }
+    }
+  }, [spotifyToken]);
 
   useEffect(() => {
     const fetchUserAndProfile = async () => {
@@ -145,25 +164,34 @@ export default function ProfileScreen({ navigation }) {
 
   const handleLogout = () => {
     playClickSFX();
-    Alert.alert(
-      "SIGN OUT",
-      "ARE YOU SURE YOU WANT TO SIGN OUT OF JUKEBOX?",
-      [
-        { text: "CANCEL", style: "cancel" },
-        {
-          text: "SIGN OUT",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await supabase.auth.signOut();
-              navigation.getParent()?.replace('Login');
-            } catch (e) {
-              console.log("Logout error", e);
-            }
+    const performLogout = async () => {
+      try {
+        await supabase.auth.signOut();
+        navigation.getParent()?.replace('Login');
+      } catch (e) {
+        console.log("Logout error", e);
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      const confirmLogout = window.confirm("ARE YOU SURE YOU WANT TO SIGN OUT OF JUKEBOX?");
+      if (confirmLogout) {
+        performLogout();
+      }
+    } else {
+      Alert.alert(
+        "SIGN OUT",
+        "ARE YOU SURE YOU WANT TO SIGN OUT OF JUKEBOX?",
+        [
+          { text: "CANCEL", style: "cancel" },
+          {
+            text: "SIGN OUT",
+            style: "destructive",
+            onPress: performLogout
           }
-        }
-      ]
-    );
+        ]
+      );
+    }
   };
 
   const handlePlayDownloaded = (song) => {
