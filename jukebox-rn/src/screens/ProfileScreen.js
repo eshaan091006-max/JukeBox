@@ -4,7 +4,7 @@ import { supabase } from '../utils/supabase';
 import { usePlayerStore } from '../store/usePlayerStore';
 import { playClickSFX } from '../utils/sfxHelper';
 import * as WebBrowser from 'expo-web-browser';
-import { makeRedirectUri, useAuthRequest } from 'expo-auth-session';
+import { makeRedirectUri, useAuthRequest, ResponseType } from 'expo-auth-session';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -45,7 +45,8 @@ export default function ProfileScreen({ navigation }) {
 
   const [request, response, promptAsync] = useAuthRequest(
     {
-      clientId: '1fb2261355cd4979af85a0c79a225fd2', // Standard placeholder client ID
+      clientId: '1fb2261355cd4979af85a0c79a225fd2',
+      responseType: ResponseType.Token,
       scopes: [
         'user-read-currently-playing',
         'user-read-playback-state',
