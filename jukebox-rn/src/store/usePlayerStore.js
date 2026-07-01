@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { Audio } from 'expo-av';
 import { supabase } from '../utils/supabase';
 import { resolveTrackUri, downloadTrack, deleteCachedTrack, getCachedSongIds } from '../utils/cacheHelper';
+import { playSpotifyTrack, pauseSpotify } from '../utils/spotify';
 
 export const usePlayerStore = create((set, get) => {
   let positionInterval = null;
@@ -35,6 +36,25 @@ export const usePlayerStore = create((set, get) => {
     }
   };
 
+  // Mock position ticker for Spotify playback simulation
+  let spotifyInterval = null;
+  const startSpotifyTicker = () => {
+    if (spotifyInterval) clearInterval(spotifyInterval);
+    spotifyInterval = setInterval(() => {
+      const { position, duration, isPlaying } = get();
+      if (isPlaying && position < duration) {
+        set({ position: position + 1000 });
+      }
+    }, 1000);
+  };
+
+  const stopSpotifyTicker = () => {
+    if (spotifyInterval) {
+      clearInterval(spotifyInterval);
+      spotifyInterval = null;
+    }
+  };
+
   return {
     sound: null,
     isPlaying: false,
@@ -45,6 +65,13 @@ export const usePlayerStore = create((set, get) => {
     duration: 0,
     lyrics: [],
     cachedSongIds: new Set(),
+    
+    // Spotify integration state
+    spotifyToken: null,
+    visualizerPreset: 'CHILL WAVE',
+
+    setSpotifyToken: (token) => set({ spotifyToken: token }),
+    setVisualizerPreset: (preset) => set({ visualizerPreset: preset }),
 
     // Load list of locally downloaded song IDs
     loadCachedRegistry: async () => {
@@ -71,19 +98,47 @@ export const usePlayerStore = create((set, get) => {
     },
 
     playTrack: async (track, queue = []) => {
-      const { sound: currentSound } = get();
+      const { sound: currentSound, spotifyToken } = get();
+      
+      // Stop active local audio
       if (currentSound) {
         stopPositionTicker();
-        await currentSound.unloadAsync();
+        await currentSound.unloadAsync().catch(() => {});
       }
+      stopSpotifyTicker();
 
       set({
         position: 0,
-        duration: 0,
+        duration: track.duration_ms || 200 * 1000, // Default duration if not from Spotify API
         isPlaying: false,
         lyrics: [],
       });
 
+      // Update active playlist queue references
+      if (queue.length > 0) {
+        set({
+          playlist: queue,
+          playlistIndex: queue.findIndex(t => t.id === track.id),
+        });
+      }
+
+      // Branch 1: If track contains a Spotify URI and token is linked, play via Spotify Connect REST
+      if (spotifyToken && track.uri) {
+        try {
+          await playSpotifyTrack(track.uri, spotifyToken);
+          set({
+            sound: null,
+            isPlaying: true,
+            currentTrack: track,
+          });
+          startSpotifyTicker();
+          return;
+        } catch (e) {
+          console.log("Spotify playback request error", e);
+        }
+      }
+
+      // Branch 2: Standard Expo-AV local file stream
       try {
         await Audio.setAudioModeAsync({
           allowsRecordingIOS: false,
@@ -92,10 +147,7 @@ export const usePlayerStore = create((set, get) => {
           shouldRouteThroughEarpieceAndroid: false,
         });
 
-        // 1. Resolve cached playing URI
         const playableUri = await resolveTrackUri(track.id.toString(), track.file_url);
-
-        // 2. Initialize expo-av sound
         const { sound: newSound } = await Audio.Sound.createAsync(
           { uri: playableUri },
           { shouldPlay: true }
@@ -107,14 +159,6 @@ export const usePlayerStore = create((set, get) => {
           currentTrack: track,
         });
 
-        if (queue.length > 0) {
-          set({
-            playlist: queue,
-            playlistIndex: queue.findIndex(t => t.id === track.id),
-          });
-        }
-
-        // Hook listener callbacks
         newSound.setOnPlaybackStatusUpdate((status) => {
           if (status.isLoaded) {
             set({ isPlaying: status.isPlaying });
@@ -124,12 +168,28 @@ export const usePlayerStore = create((set, get) => {
         startPositionTicker(newSound);
         get().loadLyrics(track.id.toString());
       } catch (e) {
-        console.log("Playback error", e);
+        console.log("Local playback error", e);
       }
     },
 
     togglePlay: async () => {
-      const { sound, isPlaying } = get();
+      const { sound, isPlaying, spotifyToken, currentTrack } = get();
+
+      // If playing Spotify track, toggle via Spotify Connect REST
+      if (spotifyToken && currentTrack?.uri) {
+        if (isPlaying) {
+          await pauseSpotify(spotifyToken);
+          set({ isPlaying: false });
+          stopSpotifyTicker();
+        } else {
+          await playSpotifyTrack(currentTrack.uri, spotifyToken);
+          set({ isPlaying: true });
+          startSpotifyTicker();
+        }
+        return;
+      }
+
+      // Otherwise, toggle standard Expo-AV audio
       if (!sound) return;
 
       if (isPlaying) {
@@ -158,7 +218,11 @@ export const usePlayerStore = create((set, get) => {
     },
 
     seek: async (posMs) => {
-      const { sound } = get();
+      const { sound, spotifyToken } = get();
+      if (spotifyToken) {
+        set({ position: posMs });
+        return;
+      }
       if (!sound) return;
       await sound.setPositionAsync(posMs);
       set({ position: posMs });
@@ -188,7 +252,6 @@ export const usePlayerStore = create((set, get) => {
           .maybeSingle();
 
         if (data && data.lines) {
-          // data.lines is a JSON array of { timeMs, text }
           set({ lyrics: data.lines });
         }
       } catch (e) {

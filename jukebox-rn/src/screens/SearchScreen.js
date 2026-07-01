@@ -5,8 +5,9 @@ import { usePlayerStore } from '../store/usePlayerStore';
 
 export default function SearchScreen() {
   const playTrack = usePlayerStore(state => state.playTrack);
+  const spotifyToken = usePlayerStore(state => state.spotifyToken);
+  
   const [userId, setUserId] = useState(null);
-
   const [allSongs, setAllSongs] = useState([]);
   const [songs, setSongs] = useState([]);
   const [likedSongIds, setLikedSongIds] = useState(new Set());
@@ -80,7 +81,7 @@ export default function SearchScreen() {
             title: song.title,
             author: song.author,
             cover_url: song.cover_url,
-            file_url: song.file_url,
+            file_url: song.file_url || '',
           });
         if (error) throw error;
         updatedLikes.add(song.id.toString());
@@ -93,6 +94,41 @@ export default function SearchScreen() {
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
+      // 1. If Spotify integration is linked, query Spotify's catalog search endpoint
+      if (spotifyToken) {
+        if (!searchQuery.trim()) {
+          setSongs([]);
+          return;
+        }
+        const searchSpotify = async () => {
+          try {
+            const res = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(searchQuery)}&type=track&limit=15`, {
+              headers: {
+                Authorization: `Bearer ${spotifyToken}`,
+              },
+            });
+            const data = await res.json();
+            if (data && data.tracks && data.tracks.items) {
+              const mapped = data.tracks.items.map(item => ({
+                id: item.id, // Spotify alphanumeric string ID
+                title: item.name,
+                author: item.artists.map(a => a.name).join(', '),
+                cover_url: item.album.images[0]?.url || 'https://picsum.photos/id/1025/100/100',
+                file_url: '',
+                uri: item.uri, // Spotify track URI (e.g. spotify:track:...)
+                duration_ms: item.duration_ms,
+              }));
+              setSongs(mapped);
+            }
+          } catch (e) {
+            console.log("Spotify search request failed", e);
+          }
+        };
+        searchSpotify();
+        return;
+      }
+
+      // 2. Otherwise, fallback to offline filter Supabase songs catalog
       if (!searchQuery.trim()) {
         setSongs(allSongs);
         return;
@@ -108,7 +144,7 @@ export default function SearchScreen() {
     }, 300);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [searchQuery, allSongs]);
+  }, [searchQuery, allSongs, spotifyToken]);
 
   const handleSearch = (text) => {
     setSearchQuery(text);
@@ -141,7 +177,7 @@ export default function SearchScreen() {
     <View style={styles.container}>
       <View style={styles.searchBarContainer}>
         <TextInput
-          placeholder="SEARCH..."
+          placeholder={spotifyToken ? "SEARCH LIVE SPOTIFY CATALOG..." : "SEARCH..."}
           placeholderTextColor="grey"
           style={styles.searchInput}
           value={searchQuery}
@@ -153,8 +189,8 @@ export default function SearchScreen() {
         <ActivityIndicator size="large" color="#ff00ff" style={styles.loader} />
       ) : songs.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>NO SONGS FOUND</Text>
-          <Text style={styles.emptySub}>CHECK DATABASE</Text>
+          <Text style={styles.emptyText}>{spotifyToken ? "TYPE TO QUERY SPOTIFY" : "NO SONGS FOUND"}</Text>
+          <Text style={styles.emptySub}>{spotifyToken ? "Search millions of tracks" : "Check database"}</Text>
         </View>
       ) : (
         <FlatList

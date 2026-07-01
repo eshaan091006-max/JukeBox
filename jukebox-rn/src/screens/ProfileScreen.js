@@ -40,7 +40,8 @@ export default function ProfileScreen({ navigation }) {
   const [isSongsLoading, setIsSongsLoading] = useState(false);
 
   // Spotify Authentication states
-  const [spotifyToken, setSpotifyToken] = useState(null);
+  const spotifyToken = usePlayerStore(state => state.spotifyToken);
+  const setSpotifyToken = usePlayerStore(state => state.setSpotifyToken);
 
   const [request, response, promptAsync] = useAuthRequest(
     {
