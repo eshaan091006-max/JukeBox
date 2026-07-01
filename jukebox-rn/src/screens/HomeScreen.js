@@ -9,6 +9,8 @@ import { playClickSFX, playCoinSFX } from '../utils/sfxHelper';
 export default function HomeScreen({ navigation }) {
   const playTrack = usePlayerStore(state => state.playTrack);
   const sound = usePlayerStore(state => state.sound);
+  const coins = usePlayerStore(state => state.coins);
+  const addCoins = usePlayerStore(state => state.addCoins);
 
   const [userId, setUserId] = useState(null);
   const [browseSongs, setBrowseSongs] = useState([]);
@@ -83,9 +85,10 @@ export default function HomeScreen({ navigation }) {
     playCoinSFX();
 
     if (pomoMode === 'STUDY') {
+      addCoins(50);
       setPomoMode('BREAK');
       setPomoTimeLeft(5 * 60);
-      Alert.alert("[!] STUDY SESSION COMPLETE", "LEVEL UP! Grab some water and take a 5-minute break.");
+      Alert.alert("[!] STUDY SESSION COMPLETE", "LEVEL UP! You earned 50 retro coins! Grab some water and take a 5-minute break.");
     } else {
       setPomoMode('STUDY');
       setPomoTimeLeft(25 * 60);
@@ -305,7 +308,12 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      <Image source={require('../../assets/titleSprite.png')} style={styles.logoImage} resizeMode="contain" />
+      <View style={styles.logoRow}>
+        <Image source={require('../../assets/titleSprite.png')} style={styles.logoImage} resizeMode="contain" />
+        <View style={[styles.coinIndicator, { borderColor: themeColor }]}>
+          <Text style={[styles.coinText, { color: themeColor }]}>🪙 {coins} COINS</Text>
+        </View>
+      </View>
 
       {/* Stories Section */}
       <View style={styles.sectionHeaderRow}>
@@ -491,11 +499,32 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingBottom: 150,
   },
+  logoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 48,
+    marginBottom: 20,
+  },
   logoImage: {
     width: 140,
     height: 44,
-    marginTop: 48,
-    marginBottom: 20,
+  },
+  coinIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    height: 28,
+    alignSelf: 'center',
+    marginLeft: 'auto',
+    backgroundColor: 'rgba(255,255,255,0.02)',
+  },
+  coinText: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    fontFamily: 'monospace',
   },
   sectionHeaderRow: {
     flexDirection: 'row',

@@ -154,7 +154,7 @@ export default function PixelBlendScreen({ navigation }) {
     playClickSFX();
     try {
       await Share.share({
-        message: `🕹️ JUKEBOX PIXEL BLEND UNLOCKED! 🕹️\nI blended my profile with ${buddies[selectedBuddyIdx].name} and scored a ${matchScore}% MATCH!\nBadge unlocked: ${badgeName}\nJoin JukeBox to see yours!`,
+        message: `🕹️ JUKEBOX PIXEL BLEND RECEIPT! 🕹️\nI blended my profile with ${buddies[selectedBuddyIdx].name} and scored a ${matchScore}% MATCH!\nBadge: ${badgeName}\nCheck out yours at JukeBox!`,
       });
     } catch (e) {
       console.log(e);
@@ -218,18 +218,28 @@ export default function PixelBlendScreen({ navigation }) {
         <View style={styles.resultView}>
           {/* Aesthetic Music Receipt Card */}
           <View style={styles.receiptCard}>
-            <Text style={styles.receiptHeader}>👾 JUKEBOX PIXEL BLEND 👾</Text>
+            <Text style={styles.receiptHeader}>=== JUKEBOX MUSIC SLIP ===</Text>
+            <Text style={styles.receiptDivider}>--------------------------</Text>
             
-            <View style={styles.scoreRing}>
-              <Text style={styles.scoreNumber}>{matchScore}%</Text>
-              <Text style={styles.scoreLabel}>MATCH</Text>
+            <View style={styles.receiptMetaRow}>
+              <Text style={styles.receiptMetaText}>HOST: USER_ME</Text>
+              <Text style={styles.receiptMetaText}>BUDDY: {buddies[selectedBuddyIdx].name}</Text>
             </View>
+            <Text style={styles.receiptDivider}>--------------------------</Text>
 
-            <Text style={styles.badgeName}>{badgeName}</Text>
-            <Text style={styles.badgeSub}>BLENDED BADGE UNLOCKED</Text>
+            <Text style={styles.receiptScoreTitle}>COMPATIBILITY MATCH:</Text>
+            <Text style={styles.receiptScoreVal}>{matchScore}%</Text>
+            
+            <Text style={styles.receiptBadgeTitle}>VIBE TIER STATUS:</Text>
+            <Text style={styles.receiptBadgeVal}>{badgeName.toUpperCase()}</Text>
+            <Text style={styles.receiptDivider}>--------------------------</Text>
+
+            <Text style={styles.receiptFooter}>THANK YOU FOR VIBING!</Text>
+            <Text style={styles.receiptFooter}>WWW.JUKE-BOX1.VERCEL.APP</Text>
+            <Text style={styles.receiptDivider}>--------------------------</Text>
 
             <TouchableOpacity style={styles.shareBtn} onPress={handleShareCard}>
-              <Text style={styles.shareBtnText}>📤 SHARE COMPATIBILITY CARD</Text>
+              <Text style={styles.shareBtnText}>[+] EXPORT RECEIPT CARD</Text>
             </TouchableOpacity>
           </View>
 
@@ -320,8 +330,8 @@ export default function PixelBlendScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0a0a0a',
-    paddingHorizontal: 24,
+    backgroundColor: '#050505',
+    paddingHorizontal: 20,
     paddingTop: 48,
   },
   contentContainer: {
@@ -402,70 +412,96 @@ const styles = StyleSheet.create({
   },
   resultView: {
     alignItems: 'center',
+    width: '100%',
   },
   receiptCard: {
     width: '100%',
-    backgroundColor: '#161616',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#ff00ff',
+    backgroundColor: '#f5f5f5',
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: '#d0d0d0',
     padding: 24,
     alignItems: 'center',
     marginBottom: 24,
+    shadowColor: '#000000',
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
   },
   receiptHeader: {
-    color: '#ff00ff',
+    color: '#000000',
+    fontSize: 14,
+    fontWeight: 'bold',
+    fontFamily: 'monospace',
+    letterSpacing: 1,
+    marginBottom: 8,
+  },
+  receiptDivider: {
+    color: '#000000',
     fontSize: 12,
-    fontWeight: 'bold',
-    letterSpacing: 2,
-    marginBottom: 20,
+    fontFamily: 'monospace',
+    marginBottom: 12,
   },
-  scoreRing: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    borderWidth: 4,
-    borderColor: '#ff00ff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-    backgroundColor: 'rgba(255,0,255,0.05)',
+  receiptMetaRow: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
   },
-  scoreNumber: {
-    color: '#ffffff',
-    fontSize: 32,
-    fontWeight: 'bold',
-  },
-  scoreLabel: {
-    color: '#ff00ff',
+  receiptMetaText: {
+    color: '#000000',
     fontSize: 10,
+    fontFamily: 'monospace',
     fontWeight: 'bold',
-    marginTop: 2,
   },
-  badgeName: {
-    color: '#ffffff',
-    fontSize: 18,
+  receiptScoreTitle: {
+    color: '#333333',
+    fontSize: 10,
+    fontFamily: 'monospace',
+    marginTop: 8,
+  },
+  receiptScoreVal: {
+    color: '#000000',
+    fontSize: 48,
     fontWeight: 'bold',
+    fontFamily: 'monospace',
+    marginVertical: 8,
+  },
+  receiptBadgeTitle: {
+    color: '#333333',
+    fontSize: 10,
+    fontFamily: 'monospace',
+    marginTop: 8,
+  },
+  receiptBadgeVal: {
+    color: '#000000',
+    fontSize: 16,
+    fontWeight: 'bold',
+    fontFamily: 'monospace',
+    marginVertical: 4,
     letterSpacing: 1,
   },
-  badgeSub: {
-    color: 'grey',
-    fontSize: 11,
+  receiptFooter: {
+    color: '#333333',
+    fontSize: 9,
+    fontFamily: 'monospace',
+    textAlign: 'center',
     marginTop: 4,
-    marginBottom: 20,
   },
   shareBtn: {
-    borderWidth: 1,
-    borderColor: '#ff00ff',
-    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: '#000000',
+    borderRadius: 4,
     paddingHorizontal: 16,
     paddingVertical: 10,
-    backgroundColor: 'rgba(255,0,255,0.05)',
+    backgroundColor: 'transparent',
+    marginTop: 16,
   },
   shareBtnText: {
-    color: '#ff00ff',
+    color: '#000000',
     fontWeight: 'bold',
     fontSize: 11,
+    fontFamily: 'monospace',
   },
   gamePromoCard: {
     backgroundColor: '#161616',

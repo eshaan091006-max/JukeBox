@@ -70,6 +70,10 @@ export const usePlayerStore = create((set, get) => {
     spotifyToken: null,
     visualizerPreset: 'CHILL WAVE',
 
+    // SaaS Gamification state
+    coins: 0,
+    purchasedColors: ['#ff00ff'],
+
     setSpotifyToken: (token) => {
       set({ spotifyToken: token });
       if (typeof window !== 'undefined' && window.localStorage) {
@@ -81,6 +85,44 @@ export const usePlayerStore = create((set, get) => {
       }
     },
     setVisualizerPreset: (preset) => set({ visualizerPreset: preset }),
+
+    addCoins: (amount) => {
+      const current = get().coins;
+      const next = current + amount;
+      set({ coins: next });
+      if (typeof window !== 'undefined' && window.localStorage) {
+        window.localStorage.setItem('pomo_coins', next.toString());
+      }
+    },
+
+    setCoins: (amount) => {
+      set({ coins: amount });
+      if (typeof window !== 'undefined' && window.localStorage) {
+        window.localStorage.setItem('pomo_coins', amount.toString());
+      }
+    },
+
+    setPurchasedColors: (colors) => {
+      set({ purchasedColors: colors });
+      if (typeof window !== 'undefined' && window.localStorage) {
+        window.localStorage.setItem('purchased_colors', JSON.stringify(colors));
+      }
+    },
+
+    purchaseColor: (color, cost) => {
+      const { coins, purchasedColors } = get();
+      if (coins >= cost && !purchasedColors.includes(color)) {
+        const nextCoins = coins - cost;
+        const nextColors = [...purchasedColors, color];
+        set({ coins: nextCoins, purchasedColors: nextColors });
+        if (typeof window !== 'undefined' && window.localStorage) {
+          window.localStorage.setItem('pomo_coins', nextCoins.toString());
+          window.localStorage.setItem('purchased_colors', JSON.stringify(nextColors));
+        }
+        return true;
+      }
+      return false;
+    },
 
     // Load list of locally downloaded song IDs
     loadCachedRegistry: async () => {

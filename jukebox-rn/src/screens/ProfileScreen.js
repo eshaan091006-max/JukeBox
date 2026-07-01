@@ -25,6 +25,11 @@ export default function ProfileScreen({ navigation }) {
   const cachedSongIds = usePlayerStore(state => state.cachedSongIds);
   const toggleDownloadTrack = usePlayerStore(state => state.toggleDownloadTrack);
 
+  // SaaS state
+  const coins = usePlayerStore(state => state.coins);
+  const purchasedColors = usePlayerStore(state => state.purchasedColors);
+  const purchaseColor = usePlayerStore(state => state.purchaseColor);
+
   const [userId, setUserId] = useState(null);
   const [email, setEmail] = useState('');
   
@@ -32,6 +37,7 @@ export default function ProfileScreen({ navigation }) {
   const [nickname, setNickname] = useState('RETRO USER');
   const [themeColor, setThemeColor] = useState('#ff00ff');
   const [profileModalVisible, setProfileModalVisible] = useState(false);
+  const [shopModalVisible, setShopModalVisible] = useState(false);
   const [inputNickname, setInputNickname] = useState('');
   const [selectedTheme, setSelectedTheme] = useState('#ff00ff');
 
@@ -210,6 +216,49 @@ export default function ProfileScreen({ navigation }) {
     }
   };
 
+  const handleSelectOrBuyColor = async (colorVal) => {
+    playClickSFX();
+    const isUnlocked = purchasedColors.includes(colorVal);
+    if (isUnlocked) {
+      try {
+        const { error } = await supabase
+          .from('profiles')
+          .upsert({
+            id: userId,
+            nickname: nickname,
+            theme_color: colorVal,
+          });
+        if (error) throw error;
+        setThemeColor(colorVal);
+        Alert.alert("Theme Selected", "Accent color updated successfully!");
+      } catch (e) {
+        Alert.alert("Error", e.message);
+      }
+    } else {
+      if (coins >= 100) {
+        const success = purchaseColor(colorVal, 100);
+        if (success) {
+          try {
+            const { error } = await supabase
+              .from('profiles')
+              .upsert({
+                id: userId,
+                nickname: nickname,
+                theme_color: colorVal,
+              });
+            if (error) throw error;
+            setThemeColor(colorVal);
+            Alert.alert("Purchase Complete!", "Unlocked and activated accent color!");
+          } catch (e) {
+            console.log(e);
+          }
+        }
+      } else {
+        Alert.alert("Insufficient Coins", "Unlock colors by completing Focus blocks on the Home tab!");
+      }
+    }
+  };
+
   const handleLogout = () => {
     playClickSFX();
     const performLogout = async () => {
@@ -237,6 +286,40 @@ export default function ProfileScreen({ navigation }) {
             style: "destructive",
             onPress: performLogout
           }
+        ]
+      );
+    }
+  };
+
+  const handleDeleteAccount = () => {
+    playClickSFX();
+    const performDelete = async () => {
+      try {
+        await supabase.from('likes').delete().eq('userId', userId);
+        await supabase.from('profiles').delete().eq('id', userId);
+        await supabase.auth.signOut();
+        if (typeof window !== 'undefined' && window.localStorage) {
+          window.localStorage.clear();
+        }
+        navigation.navigate('Login');
+        Alert.alert("Account Deleted", "All your data has been permanently erased from JukeBox.");
+      } catch (e) {
+        Alert.alert("Error", "Could not complete deletion: " + e.message);
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      const confirmDelete = window.confirm("WARNING: THIS WILL PERMANENTLY ERASE YOUR PROFILE, DOWNLOADS, AND LIKED SONGS. THIS ACTION CANNOT BE UNDONE. PROCEED?");
+      if (confirmDelete) {
+        performDelete();
+      }
+    } else {
+      Alert.alert(
+        "WARNING: DELETE ACCOUNT",
+        "THIS WILL PERMANENTLY ERASE YOUR DATA. PROCEED?",
+        [
+          { text: "CANCEL", style: "cancel" },
+          { text: "PERMANENTLY DELETE", style: "destructive", onPress: performDelete }
         ]
       );
     }
@@ -285,6 +368,16 @@ export default function ProfileScreen({ navigation }) {
               {spotifyToken ? 'SPOTIFY LINKED' : 'LINK SPOTIFY'}
             </Text>
           </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={[styles.shopBtn, { borderColor: themeColor }]}
+            onPress={() => {
+              setShopModalVisible(true);
+              playClickSFX();
+            }}
+          >
+            <Text style={[styles.shopBtnText, { color: themeColor }]}>🛒 SHOP</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -328,10 +421,17 @@ export default function ProfileScreen({ navigation }) {
         />
       )}
 
-      <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-        <Image source={require('../../assets/logout_button.png')} style={styles.logoutIcon} />
-        <Text style={styles.logoutText}>LOGOUT</Text>
-      </TouchableOpacity>
+      <View style={styles.footerActions}>
+        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+          <Image source={require('../../assets/logout_button.png')} style={styles.logoutIcon} />
+          <Text style={styles.logoutText}>LOGOUT</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.deleteAccBtn} onPress={handleDeleteAccount}>
+          <Image source={require('../../assets/power_button.png')} style={styles.deleteAccIcon} />
+          <Text style={styles.deleteAccText}>DELETE DATA</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Profile editor modal dialog */}
       <Modal
@@ -374,6 +474,48 @@ export default function ProfileScreen({ navigation }) {
               </TouchableOpacity>
               <TouchableOpacity onPress={handleUpdateProfile}>
                 <Text style={styles.saveText}>SAVE CHANGES</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Theme Shop Modal Dialog */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={shopModalVisible}
+        onRequestClose={() => setShopModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>👾 RETRO THEME SHOP</Text>
+            <Text style={styles.modalSubtitle}>Current Balance: 🪙 {coins} COINS</Text>
+            
+            <View style={styles.shopGrid}>
+              {COLOR_OPTIONS.map((opt) => {
+                const isUnlocked = purchasedColors.includes(opt.value);
+                return (
+                  <View key={opt.value} style={styles.shopItem}>
+                    <TouchableOpacity
+                      onPress={() => handleSelectOrBuyColor(opt.value)}
+                      style={[
+                        styles.colorCircle,
+                        { backgroundColor: opt.value, borderColor: themeColor === opt.value ? '#ffffff' : 'rgba(255,255,255,0.1)' }
+                      ]}
+                    />
+                    <Text style={[styles.colorName, { color: opt.value }]}>{opt.name}</Text>
+                    <Text style={styles.colorCost}>
+                      {isUnlocked ? 'UNLOCKED' : '🪙 100'}
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
+
+            <View style={[styles.modalActions, { marginTop: 24 }]}>
+              <TouchableOpacity onPress={() => setShopModalVisible(false)} style={{ width: '100%', alignItems: 'center' }}>
+                <Text style={styles.cancelText}>CLOSE SHOP</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -430,12 +572,12 @@ const styles = StyleSheet.create({
   },
   profileActionsRow: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 8,
     alignItems: 'center',
   },
   editBtn: {
     borderRadius: 8,
-    paddingHorizontal: 18,
+    paddingHorizontal: 12,
     paddingVertical: 10,
   },
   editBtnText: {
@@ -447,7 +589,7 @@ const styles = StyleSheet.create({
   spotifyBtn: {
     borderWidth: 1.5,
     borderRadius: 8,
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     paddingVertical: 10,
     backgroundColor: 'transparent',
   },
@@ -457,6 +599,17 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   spotifyBtnText: {
+    fontSize: 11,
+    fontWeight: 'bold',
+  },
+  shopBtn: {
+    borderWidth: 1.5,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: 'transparent',
+  },
+  shopBtnText: {
     fontSize: 11,
     fontWeight: 'bold',
   },
@@ -557,13 +710,17 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     tintColor: '#ff4d4d',
   },
+  footerActions: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 20,
+    marginVertical: 20,
+  },
   logoutBtn: {
-    alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    padding: 16,
-    marginBottom: 30,
+    padding: 12,
   },
   logoutIcon: {
     width: 14,
@@ -573,7 +730,25 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     color: '#ff4d4d',
-    fontSize: 13,
+    fontSize: 12,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+  },
+  deleteAccBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 12,
+  },
+  deleteAccIcon: {
+    width: 14,
+    height: 14,
+    resizeMode: 'contain',
+    tintColor: '#ff4d4d',
+  },
+  deleteAccText: {
+    color: '#ff4d4d',
+    fontSize: 12,
     fontWeight: 'bold',
     letterSpacing: 1,
   },
@@ -596,8 +771,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: 12,
     letterSpacing: 1.5,
+  },
+  modalSubtitle: {
+    color: 'grey',
+    fontSize: 11,
+    textAlign: 'center',
+    marginBottom: 20,
   },
   modalLabel: {
     color: 'grey',
@@ -628,6 +809,34 @@ const styles = StyleSheet.create({
     height: 34,
     borderRadius: 17,
     borderWidth: 2,
+  },
+  shopGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-evenly',
+    gap: 16,
+    marginVertical: 12,
+  },
+  shopItem: {
+    alignItems: 'center',
+    width: '40%',
+    padding: 12,
+    backgroundColor: 'rgba(255,255,255,0.02)',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+  },
+  colorName: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    marginTop: 6,
+    letterSpacing: 1,
+  },
+  colorCost: {
+    fontSize: 9,
+    color: 'grey',
+    marginTop: 4,
+    fontWeight: 'bold',
   },
   modalActions: {
     flexDirection: 'row',

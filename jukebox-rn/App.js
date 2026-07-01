@@ -10,6 +10,8 @@ import { makeRedirectUri } from 'expo-auth-session';
 export default function App() {
   const spotifyToken = usePlayerStore(state => state.spotifyToken);
   const setSpotifyToken = usePlayerStore(state => state.setSpotifyToken);
+  const setCoins = usePlayerStore(state => state.setCoins);
+  const setPurchasedColors = usePlayerStore(state => state.setPurchasedColors);
 
   const exchangeCodeForToken = async (code, codeVerifier) => {
     try {
@@ -93,6 +95,22 @@ export default function App() {
   useEffect(() => {
     fetchSharedSpotifyToken();
     const interval = setInterval(fetchSharedSpotifyToken, 45 * 60 * 1000);
+
+    if (Platform.OS === 'web' && typeof window !== 'undefined' && window.localStorage) {
+      const savedCoins = window.localStorage.getItem('pomo_coins');
+      if (savedCoins) {
+        setCoins(parseInt(savedCoins, 10));
+      }
+      const savedColors = window.localStorage.getItem('purchased_colors');
+      if (savedColors) {
+        try {
+          setPurchasedColors(JSON.parse(savedColors));
+        } catch (e) {
+          console.log("Error restoring colors", e);
+        }
+      }
+    }
+
     return () => clearInterval(interval);
   }, []);
 
