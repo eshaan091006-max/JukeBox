@@ -85,11 +85,11 @@ export default function HomeScreen({ navigation }) {
     if (pomoMode === 'STUDY') {
       setPomoMode('BREAK');
       setPomoTimeLeft(5 * 60);
-      Alert.alert("📚 STUDY SESSION COMPLETE", "LEVEL UP! Grab some water and take a 5-minute break.");
+      Alert.alert("[!] STUDY SESSION COMPLETE", "LEVEL UP! Grab some water and take a 5-minute break.");
     } else {
       setPomoMode('STUDY');
       setPomoTimeLeft(25 * 60);
-      Alert.alert("☕ BREAK OVER", "Let's get back to gaming and focus. 25-minute timer start!");
+      Alert.alert("[!] BREAK OVER", "Let's get back to gaming and focus. 25-minute timer start!");
     }
   };
 
@@ -311,13 +311,13 @@ export default function HomeScreen({ navigation }) {
       </View>
 
       {/* Stories Section */}
-      <Text style={styles.sectionHeader}>👾 DAILY VIBE STORIES</Text>
+      <Text style={styles.sectionHeader}>[ DAILY VIBE STORIES ]</Text>
       <MusicStories />
 
       {/* Chiptune Pomodoro Study Timer Card */}
       <View style={[styles.pomoCard, { borderColor: themeColor }]}>
         <View style={styles.pomoHeader}>
-          <Text style={styles.pomoTitle}>⏳ FOCUS SESSION</Text>
+          <Text style={styles.pomoTitle}>[ FOCUS SESSION ]</Text>
           <Text style={[styles.pomoBadge, { color: themeColor, borderColor: themeColor, backgroundColor: `${themeColor}15` }]}>
             {pomoMode}
           </Text>
@@ -325,7 +325,7 @@ export default function HomeScreen({ navigation }) {
         <Text style={[styles.pomoTimerText, { textShadowColor: themeColor }]}>{formatPomoTime(pomoTimeLeft)}</Text>
         <View style={styles.pomoActionRow}>
           <TouchableOpacity onPress={togglePomoTimer} style={[styles.pomoBtn, { backgroundColor: themeColor }]}>
-            <Text style={styles.pomoBtnText}>{pomoActive ? '⏸ PAUSE FOCUS' : '⚡ START FOCUS'}</Text>
+            <Text style={styles.pomoBtnText}>{pomoActive ? '[||] PAUSE FOCUS' : '[>] START FOCUS'}</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={resetPomoTimer} style={styles.pomoResetBtn}>
             <Text style={styles.pomoResetText}>RESET</Text>
@@ -336,7 +336,7 @@ export default function HomeScreen({ navigation }) {
       {/* Disappearing Song Snaps Feed */}
       {snaps.length > 0 && (
         <View style={styles.snapsFeedSection}>
-          <Text style={styles.sectionHeader}>📸 UNOPENED SONG SNAPS</Text>
+          <Text style={styles.sectionHeader}>[o] UNOPENED SONG SNAPS</Text>
           <FlatList
             horizontal
             data={snaps}
@@ -355,7 +355,7 @@ export default function HomeScreen({ navigation }) {
       )}
 
       {/* Discover Section */}
-      <Text style={styles.sectionHeader}>💿 DISCOVER TRACKS</Text>
+      <Text style={styles.sectionHeader}>[ DISCOVER TRACKS ]</Text>
       {isLoading ? (
         <ActivityIndicator size="small" color={themeColor} style={styles.loader} />
       ) : (
@@ -369,12 +369,12 @@ export default function HomeScreen({ navigation }) {
 
       {/* Pixel Blend Trigger Card */}
       <TouchableOpacity style={styles.blendCard} onPress={() => navigation.navigate('PixelBlend')}>
-        <Text style={styles.blendIcon}>⚡</Text>
+        <Text style={styles.blendIcon}>[+]</Text>
         <Text style={styles.blendText}>COMPATIBILITY PIXEL BLEND</Text>
       </TouchableOpacity>
 
       {/* Favorites Section */}
-      <Text style={styles.sectionHeader}>💖 YOUR FAVORITE SOUNDS</Text>
+      <Text style={styles.sectionHeader}>[ YOUR FAVORITE SOUNDS ]</Text>
       {isFavoritesLoading ? (
         <ActivityIndicator size="small" color={themeColor} style={styles.loader} />
       ) : favorites.length === 0 ? (
@@ -393,7 +393,7 @@ export default function HomeScreen({ navigation }) {
 
       {/* Jam Lobby Trigger Button */}
       <TouchableOpacity style={[styles.jamBtn, { backgroundColor: themeColor }]} onPress={() => setJamModalVisible(true)}>
-        <Text style={styles.jamBtnText}>🎮 CREATE / JOIN PARTY JAM</Text>
+        <Text style={styles.jamBtnText}>[+] CREATE / JOIN PARTY JAM</Text>
       </TouchableOpacity>
 
       {/* Jam Input Dialog Modal */}
@@ -458,8 +458,8 @@ export default function HomeScreen({ navigation }) {
                 <Text style={styles.snapMsgText}>{activeSnap.message.toUpperCase()}</Text>
               </View>
 
-              <Text style={styles.snapPlayerTitle}>🎵 {activeSnap.title.toUpperCase()}</Text>
-              <Text style={styles.snapNotice}>⚠️ THIS SNAP DESTROYS UPON CLOSING</Text>
+              <Text style={styles.snapPlayerTitle}>[#] {activeSnap.title.toUpperCase()}</Text>
+              <Text style={styles.snapNotice}>[!] THIS SNAP DESTROYS UPON CLOSING</Text>
             </View>
           </View>
         )}
@@ -628,7 +628,8 @@ const styles = StyleSheet.create({
   },
   blendIcon: {
     color: '#00e5ff',
-    fontSize: 16,
+    fontSize: 14,
+    fontWeight: 'bold',
     marginRight: 8,
   },
   blendText: {

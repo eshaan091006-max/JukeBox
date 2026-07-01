@@ -183,7 +183,7 @@ export default function SearchScreen() {
     <View style={styles.container}>
       <View style={styles.searchBarContainer}>
         <TextInput
-          placeholder={spotifyToken ? "🔍 SEARCH 100M+ SPOTIFY TRACKS..." : "🔍 SEARCH LOCAL CATALOG..."}
+          placeholder={spotifyToken ? "[>] SEARCH 100M+ SPOTIFY TRACKS..." : "[>] SEARCH LOCAL CATALOG..."}
           placeholderTextColor="grey"
           style={styles.searchInput}
           value={searchQuery}

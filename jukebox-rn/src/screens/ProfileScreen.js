@@ -251,7 +251,7 @@ export default function ProfileScreen({ navigation }) {
       {/* Header Profile Info card */}
       <View style={[styles.profileHeaderCard, { borderColor: themeColor, shadowColor: themeColor }]}>
         <View style={[styles.avatarBorder, { borderColor: themeColor }]}>
-          <Text style={styles.avatarText}>👤</Text>
+          <Text style={styles.avatarText}>[P]</Text>
         </View>
         <Text style={styles.nickname}>{nickname.toUpperCase()}</Text>
         <Text style={styles.email}>{email}</Text>
@@ -281,14 +281,14 @@ export default function ProfileScreen({ navigation }) {
             }}
           >
             <Text style={[styles.spotifyBtnText, { color: spotifyToken ? '#1DB954' : 'grey' }]}>
-              {spotifyToken ? '✓ SPOTIFY LINKED' : '🔌 LINK SPOTIFY'}
+              {spotifyToken ? '[V] SPOTIFY LINKED' : '[+] LINK SPOTIFY'}
             </Text>
           </TouchableOpacity>
         </View>
       </View>
 
       {/* Downloads Manager list */}
-      <Text style={styles.sectionTitle}>💾 LOCAL DOWNLOADS</Text>
+      <Text style={styles.sectionTitle}>[#] LOCAL DOWNLOADS</Text>
       {isSongsLoading ? (
         <ActivityIndicator size="small" color={themeColor} style={styles.loader} />
       ) : downloadedSongs.length === 0 ? (
@@ -407,7 +407,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.03)',
   },
   avatarText: {
-    fontSize: 32,
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#ffffff',
   },
   nickname: {
     color: '#ffffff',

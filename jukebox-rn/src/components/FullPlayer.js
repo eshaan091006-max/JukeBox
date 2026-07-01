@@ -256,7 +256,7 @@ export default function FullPlayer({ onClose }) {
       <View style={styles.eqRow}>
         {EQ_PRESETS.map((preset) => {
           const isActive = visualizerPreset === preset;
-          const label = preset === 'CHILL WAVE' ? '〰️ CHILL WAVE' : preset === 'BASS BOOST' ? '🔊 BASS BOOST' : '⚡ GLITCH POP';
+          const label = preset === 'CHILL WAVE' ? '[-] CHILL WAVE' : preset === 'BASS BOOST' ? '[+] BASS BOOST' : '[*] GLITCH POP';
           return (
             <TouchableOpacity
               key={preset}
@@ -310,7 +310,7 @@ export default function FullPlayer({ onClose }) {
             }}
             style={styles.projectorBtn}
           >
-            <Text style={styles.projectorText}>📺 PROJECTOR</Text>
+            <Text style={styles.projectorText}>[V] PROJECTOR</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -321,7 +321,7 @@ export default function FullPlayer({ onClose }) {
             }}
             style={styles.snapBtn}
           >
-            <Text style={styles.snapBtnText}>📸 SNAP</Text>
+            <Text style={styles.snapBtnText}>[o] SNAP</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -333,7 +333,7 @@ export default function FullPlayer({ onClose }) {
             style={styles.downloadBtn}
           >
             <Text style={[styles.downloadIcon, { color: isDownloaded ? '#ff00ff' : 'grey' }]}>
-              {isDownloaded ? '✓ CACHED' : '⬇ DOWNLOAD'}
+              {isDownloaded ? '[V] CACHED' : '[v] DOWNLOAD'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -456,7 +456,7 @@ export default function FullPlayer({ onClose }) {
           {/* Simple controls */}
           <View style={styles.projectorControls}>
             <TouchableOpacity onPress={togglePlay} style={styles.projectorPlayBtn}>
-              <Text style={styles.projectorPlayText}>{isPlaying ? '⏸ PAUSE' : '▶ PLAY'}</Text>
+              <Text style={styles.projectorPlayText}>{isPlaying ? '[||] PAUSE' : '[>] PLAY'}</Text>
             </TouchableOpacity>
           </View>
         </SafeAreaView>
@@ -471,7 +471,7 @@ export default function FullPlayer({ onClose }) {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>📸 CREATE SONG SNAP</Text>
+            <Text style={styles.modalTitle}>[o] CREATE SONG SNAP</Text>
             <Text style={styles.modalSubtitle}>Write a chiptune status note overlay:</Text>
             <TextInput
               placeholder="E.g., VIBING OUT TO THIS BEAT..."
@@ -550,7 +550,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.04)',
+    borderColor: 'rgba(255,255,255,0.02)',
   },
   lyricsListContent: {
     paddingVertical: height * 0.15,
@@ -574,7 +574,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.04)',
+    borderColor: 'rgba(255,255,255,0.02)',
   },
   queueHeader: {
     color: '#ff00ff',
