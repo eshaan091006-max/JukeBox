@@ -298,34 +298,38 @@ export default function HomeScreen({ navigation }) {
         <Text style={styles.rowAuthor} numberOfLines={1}>{item.author.toUpperCase()}</Text>
       </View>
       <View style={styles.playIconContainer}>
-        <Text style={styles.playIcon}>▶</Text>
+        <Image source={require('../../assets/play_button.png')} style={styles.rowPlayIcon} />
       </View>
     </TouchableOpacity>
   );
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      <View style={styles.logoRow}>
-        <Text style={styles.logoText}>JUKE</Text>
-        <Text style={[styles.logoText, { color: themeColor }]}>BOX</Text>
-      </View>
+      <Image source={require('../../assets/titleSprite.png')} style={styles.logoImage} resizeMode="contain" />
 
       {/* Stories Section */}
-      <Text style={styles.sectionHeader}>[ DAILY VIBE STORIES ]</Text>
+      <View style={styles.sectionHeaderRow}>
+        <Image source={require('../../assets/music_note.png')} style={styles.headerIcon} />
+        <Text style={styles.sectionHeader}>DAILY VIBE STORIES</Text>
+      </View>
       <MusicStories />
 
       {/* Chiptune Pomodoro Study Timer Card */}
       <View style={[styles.pomoCard, { borderColor: themeColor }]}>
         <View style={styles.pomoHeader}>
-          <Text style={styles.pomoTitle}>[ FOCUS SESSION ]</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Image source={require('../../assets/music_note.png')} style={[styles.headerIcon, { tintColor: themeColor }]} />
+            <Text style={styles.pomoTitle}>FOCUS SESSION</Text>
+          </View>
           <Text style={[styles.pomoBadge, { color: themeColor, borderColor: themeColor, backgroundColor: `${themeColor}15` }]}>
             {pomoMode}
           </Text>
         </View>
         <Text style={[styles.pomoTimerText, { textShadowColor: themeColor }]}>{formatPomoTime(pomoTimeLeft)}</Text>
         <View style={styles.pomoActionRow}>
-          <TouchableOpacity onPress={togglePomoTimer} style={[styles.pomoBtn, { backgroundColor: themeColor }]}>
-            <Text style={styles.pomoBtnText}>{pomoActive ? '[||] PAUSE FOCUS' : '[>] START FOCUS'}</Text>
+          <TouchableOpacity onPress={togglePomoTimer} style={[styles.pomoBtn, { backgroundColor: themeColor, flexDirection: 'row', alignItems: 'center', gap: 6 }]}>
+            <Image source={require('../../assets/play_button.png')} style={[styles.btnPlayIcon, { tintColor: '#000000' }]} />
+            <Text style={styles.pomoBtnText}>{pomoActive ? 'PAUSE FOCUS' : 'START FOCUS'}</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={resetPomoTimer} style={styles.pomoResetBtn}>
             <Text style={styles.pomoResetText}>RESET</Text>
@@ -336,7 +340,10 @@ export default function HomeScreen({ navigation }) {
       {/* Disappearing Song Snaps Feed */}
       {snaps.length > 0 && (
         <View style={styles.snapsFeedSection}>
-          <Text style={styles.sectionHeader}>[o] UNOPENED SONG SNAPS</Text>
+          <View style={styles.sectionHeaderRow}>
+            <Image source={require('../../assets/music_note.png')} style={styles.headerIcon} />
+            <Text style={styles.sectionHeader}>UNOPENED SONG SNAPS</Text>
+          </View>
           <FlatList
             horizontal
             data={snaps}
@@ -355,7 +362,10 @@ export default function HomeScreen({ navigation }) {
       )}
 
       {/* Discover Section */}
-      <Text style={styles.sectionHeader}>[ DISCOVER TRACKS ]</Text>
+      <View style={styles.sectionHeaderRow}>
+        <Image source={require('../../assets/music_note.png')} style={styles.headerIcon} />
+        <Text style={styles.sectionHeader}>DISCOVER TRACKS</Text>
+      </View>
       {isLoading ? (
         <ActivityIndicator size="small" color={themeColor} style={styles.loader} />
       ) : (
@@ -369,12 +379,15 @@ export default function HomeScreen({ navigation }) {
 
       {/* Pixel Blend Trigger Card */}
       <TouchableOpacity style={styles.blendCard} onPress={() => navigation.navigate('PixelBlend')}>
-        <Text style={styles.blendIcon}>[+]</Text>
+        <Image source={require('../../assets/connect_icon.png')} style={styles.blendIcon} />
         <Text style={styles.blendText}>COMPATIBILITY PIXEL BLEND</Text>
       </TouchableOpacity>
 
       {/* Favorites Section */}
-      <Text style={styles.sectionHeader}>[ YOUR FAVORITE SOUNDS ]</Text>
+      <View style={styles.sectionHeaderRow}>
+        <Image source={require('../../assets/music_note.png')} style={styles.headerIcon} />
+        <Text style={styles.sectionHeader}>YOUR FAVORITE SOUNDS</Text>
+      </View>
       {isFavoritesLoading ? (
         <ActivityIndicator size="small" color={themeColor} style={styles.loader} />
       ) : favorites.length === 0 ? (
@@ -393,7 +406,8 @@ export default function HomeScreen({ navigation }) {
 
       {/* Jam Lobby Trigger Button */}
       <TouchableOpacity style={[styles.jamBtn, { backgroundColor: themeColor }]} onPress={() => setJamModalVisible(true)}>
-        <Text style={styles.jamBtnText}>[+] CREATE / JOIN PARTY JAM</Text>
+        <Image source={require('../../assets/jam_icon.png')} style={styles.jamIcon} />
+        <Text style={styles.jamBtnText}>CREATE / JOIN PARTY JAM</Text>
       </TouchableOpacity>
 
       {/* Jam Input Dialog Modal */}
@@ -477,23 +491,30 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingBottom: 150,
   },
-  logoRow: {
-    flexDirection: 'row',
+  logoImage: {
+    width: 140,
+    height: 44,
     marginTop: 48,
     marginBottom: 20,
   },
-  logoText: {
-    fontSize: 32,
-    fontWeight: '900',
-    letterSpacing: 2,
-    color: '#ffffff',
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 18,
+    marginBottom: 8,
+  },
+  headerIcon: {
+    width: 12,
+    height: 12,
+    marginRight: 8,
+    resizeMode: 'contain',
+    tintColor: 'grey',
   },
   sectionHeader: {
     color: 'grey',
     fontSize: 11,
     fontWeight: 'bold',
     letterSpacing: 2,
-    marginVertical: 12,
   },
   loader: {
     marginVertical: 16,
@@ -502,7 +523,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#0d0d0d',
     borderRadius: 16,
     padding: 24,
-    marginBottom: 24,
+    marginVertical: 12,
     borderWidth: 2,
     shadowColor: '#ff00ff',
     shadowOpacity: 0.15,
@@ -547,8 +568,13 @@ const styles = StyleSheet.create({
   },
   pomoBtn: {
     borderRadius: 8,
-    paddingHorizontal: 28,
-    paddingVertical: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  btnPlayIcon: {
+    width: 10,
+    height: 10,
+    resizeMode: 'contain',
   },
   pomoBtnText: {
     color: '#000000',
@@ -557,7 +583,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   pomoResetBtn: {
-    padding: 12,
+    padding: 10,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
     borderRadius: 8,
@@ -606,10 +632,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  playIcon: {
-    color: '#ff00ff',
-    fontSize: 11,
-    marginLeft: 2,
+  rowPlayIcon: {
+    width: 10,
+    height: 10,
+    resizeMode: 'contain',
+    tintColor: '#ff00ff',
   },
   blendCard: {
     height: 52,
@@ -627,10 +654,11 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
   },
   blendIcon: {
-    color: '#00e5ff',
-    fontSize: 14,
-    fontWeight: 'bold',
+    width: 14,
+    height: 14,
     marginRight: 8,
+    resizeMode: 'contain',
+    tintColor: '#00e5ff',
   },
   blendText: {
     color: '#ffffff',
@@ -663,9 +691,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 30,
-    shadowColor: '#ff00ff',
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
+    flexDirection: 'row',
+    gap: 8,
+  },
+  jamIcon: {
+    width: 16,
+    height: 16,
+    resizeMode: 'contain',
+    tintColor: '#000000',
   },
   jamBtnText: {
     color: '#000000',

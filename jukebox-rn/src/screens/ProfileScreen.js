@@ -251,7 +251,7 @@ export default function ProfileScreen({ navigation }) {
       {/* Header Profile Info card */}
       <View style={[styles.profileHeaderCard, { borderColor: themeColor, shadowColor: themeColor }]}>
         <View style={[styles.avatarBorder, { borderColor: themeColor }]}>
-          <Text style={styles.avatarText}>[P]</Text>
+          <Image source={require('../../assets/profile_icon.png')} style={[styles.avatarIcon, { tintColor: themeColor }]} />
         </View>
         <Text style={styles.nickname}>{nickname.toUpperCase()}</Text>
         <Text style={styles.email}>{email}</Text>
@@ -269,7 +269,7 @@ export default function ProfileScreen({ navigation }) {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.spotifyBtn, { borderColor: spotifyToken ? '#1DB954' : 'grey' }]}
+            style={[styles.spotifyBtn, { borderColor: spotifyToken ? '#1DB954' : 'grey', flexDirection: 'row', alignItems: 'center', gap: 6 }]}
             disabled={!request}
             onPress={() => {
               playClickSFX();
@@ -280,15 +280,19 @@ export default function ProfileScreen({ navigation }) {
               promptAsync({ windowName: Platform.OS === 'web' ? '_self' : '_blank' });
             }}
           >
+            <Image source={require('../../assets/connect_icon.png')} style={[styles.btnSpotifyIcon, { tintColor: spotifyToken ? '#1DB954' : 'grey' }]} />
             <Text style={[styles.spotifyBtnText, { color: spotifyToken ? '#1DB954' : 'grey' }]}>
-              {spotifyToken ? '[V] SPOTIFY LINKED' : '[+] LINK SPOTIFY'}
+              {spotifyToken ? 'SPOTIFY LINKED' : 'LINK SPOTIFY'}
             </Text>
           </TouchableOpacity>
         </View>
       </View>
 
       {/* Downloads Manager list */}
-      <Text style={styles.sectionTitle}>[#] LOCAL DOWNLOADS</Text>
+      <View style={styles.sectionHeaderRow}>
+        <Image source={require('../../assets/music_note.png')} style={styles.headerIcon} />
+        <Text style={styles.sectionTitle}>LOCAL DOWNLOADS</Text>
+      </View>
       {isSongsLoading ? (
         <ActivityIndicator size="small" color={themeColor} style={styles.loader} />
       ) : downloadedSongs.length === 0 ? (
@@ -317,7 +321,7 @@ export default function ProfileScreen({ navigation }) {
                 }}
                 style={styles.deleteBtn}
               >
-                <Text style={styles.deleteIcon}>✕ DELETE</Text>
+                <Image source={require('../../assets/power_button.png')} style={styles.deleteIcon} />
               </TouchableOpacity>
             </View>
           )}
@@ -325,7 +329,8 @@ export default function ProfileScreen({ navigation }) {
       )}
 
       <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-        <Text style={styles.logoutText}>Logout</Text>
+        <Image source={require('../../assets/logout_button.png')} style={styles.logoutIcon} />
+        <Text style={styles.logoutText}>LOGOUT</Text>
       </TouchableOpacity>
 
       {/* Profile editor modal dialog */}
@@ -406,10 +411,10 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     backgroundColor: 'rgba(255,255,255,0.03)',
   },
-  avatarText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#ffffff',
+  avatarIcon: {
+    width: 32,
+    height: 32,
+    resizeMode: 'contain',
   },
   nickname: {
     color: '#ffffff',
@@ -446,16 +451,32 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     backgroundColor: 'transparent',
   },
+  btnSpotifyIcon: {
+    width: 14,
+    height: 14,
+    resizeMode: 'contain',
+  },
   spotifyBtnText: {
     fontSize: 11,
     fontWeight: 'bold',
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  headerIcon: {
+    width: 12,
+    height: 12,
+    marginRight: 8,
+    resizeMode: 'contain',
+    tintColor: 'grey',
   },
   sectionTitle: {
     color: 'grey',
     fontSize: 11,
     fontWeight: 'bold',
     letterSpacing: 2,
-    marginBottom: 16,
   },
   loader: {
     marginTop: 20,
@@ -521,21 +542,34 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   deleteBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderWidth: 1.5,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255,77,77,0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
     borderColor: '#ff4d4d',
-    borderRadius: 8,
   },
   deleteIcon: {
-    color: '#ff4d4d',
-    fontSize: 10,
-    fontWeight: 'bold',
+    width: 10,
+    height: 10,
+    resizeMode: 'contain',
+    tintColor: '#ff4d4d',
   },
   logoutBtn: {
     alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
     padding: 16,
     marginBottom: 30,
+  },
+  logoutIcon: {
+    width: 14,
+    height: 14,
+    resizeMode: 'contain',
+    tintColor: '#ff4d4d',
   },
   logoutText: {
     color: '#ff4d4d',

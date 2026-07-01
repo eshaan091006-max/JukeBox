@@ -140,7 +140,7 @@ export default function FullPlayer({ onClose }) {
       {/* Header with 3 view tabs */}
       <View style={styles.header}>
         <TouchableOpacity onPress={onClose} style={styles.backBtn}>
-          <Text style={styles.backText}>◀</Text>
+          <Image source={require('../../assets/left_arrow.png')} style={styles.backIcon} />
         </TouchableOpacity>
         
         <View style={styles.headerTabRow}>
@@ -365,7 +365,7 @@ export default function FullPlayer({ onClose }) {
           disabled={!hasPrevious}
           style={[styles.navBtn, { opacity: hasPrevious ? 1 : 0.3 }]}
         >
-          <Text style={styles.navText}>◀◀</Text>
+          <Image source={require('../../assets/previous_button.png')} style={styles.navIcon} />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -376,7 +376,7 @@ export default function FullPlayer({ onClose }) {
           }}
           style={styles.playBtn}
         >
-          <Text style={styles.playText}>{isPlaying ? '⏸' : '▶'}</Text>
+          <Image source={isPlaying ? require('../../assets/pause_button.png') : require('../../assets/play_button.png')} style={styles.playIconImage} />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -388,7 +388,7 @@ export default function FullPlayer({ onClose }) {
           disabled={!hasNext}
           style={[styles.navBtn, { opacity: hasNext ? 1 : 0.3 }]}
         >
-          <Text style={styles.navText}>▶▶</Text>
+          <Image source={require('../../assets/next_button.png')} style={styles.navIcon} />
         </TouchableOpacity>
       </View>
 
@@ -512,10 +512,11 @@ const styles = StyleSheet.create({
   backBtn: {
     padding: 8,
   },
-  backText: {
-    color: '#ffffff',
-    fontSize: 20,
-    fontWeight: 'bold',
+  backIcon: {
+    width: 14,
+    height: 14,
+    resizeMode: 'contain',
+    tintColor: '#ffffff',
   },
   headerTabRow: {
     flexDirection: 'row',
@@ -741,13 +742,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-evenly',
     marginVertical: 5,
   },
-  navBtn: {
-    padding: 16,
-  },
-  navText: {
-    color: '#ffffff',
-    fontSize: 24,
-    fontWeight: 'bold',
+  navIcon: {
+    width: 20,
+    height: 20,
+    resizeMode: 'contain',
+    tintColor: '#ffffff',
   },
   playBtn: {
     width: 60,
@@ -761,11 +760,11 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 0 },
   },
-  playText: {
-    color: '#000000',
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginLeft: 3,
+  playIconImage: {
+    width: 24,
+    height: 24,
+    resizeMode: 'contain',
+    tintColor: '#000000',
   },
   modalOverlay: {
     flex: 1,

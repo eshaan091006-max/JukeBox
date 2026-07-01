@@ -173,7 +173,7 @@ export default function SearchScreen() {
         </TouchableOpacity>
         
         <View style={styles.playIconContainer}>
-          <Text style={styles.playIcon}>▶</Text>
+          <Image source={require('../../assets/play_button.png')} style={styles.rowPlayIcon} />
         </View>
       </TouchableOpacity>
     );
@@ -182,8 +182,9 @@ export default function SearchScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.searchBarContainer}>
+        <Image source={require('../../assets/search_icon.png')} style={styles.searchIcon} />
         <TextInput
-          placeholder={spotifyToken ? "[>] SEARCH 100M+ SPOTIFY TRACKS..." : "[>] SEARCH LOCAL CATALOG..."}
+          placeholder={spotifyToken ? "SEARCH 100M+ SPOTIFY TRACKS..." : "SEARCH LOCAL CATALOG..."}
           placeholderTextColor="grey"
           style={styles.searchInput}
           value={searchQuery}
@@ -219,16 +220,27 @@ const styles = StyleSheet.create({
   searchBarContainer: {
     marginTop: 48,
     marginBottom: 20,
-  },
-  searchInput: {
-    height: 52,
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.04)',
     borderRadius: 12,
-    paddingHorizontal: 16,
-    color: '#ffffff',
-    fontSize: 14,
     borderWidth: 1.5,
     borderColor: 'rgba(255,255,255,0.06)',
+    paddingHorizontal: 16,
+    height: 52,
+  },
+  searchIcon: {
+    width: 16,
+    height: 16,
+    resizeMode: 'contain',
+    tintColor: 'grey',
+    marginRight: 10,
+  },
+  searchInput: {
+    flex: 1,
+    height: '100%',
+    color: '#ffffff',
+    fontSize: 14,
     letterSpacing: 0.5,
   },
   loader: {
@@ -283,10 +295,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginLeft: 4,
   },
-  playIcon: {
-    color: '#ff00ff',
-    fontSize: 11,
-    marginLeft: 2,
+  rowPlayIcon: {
+    width: 10,
+    height: 10,
+    resizeMode: 'contain',
+    tintColor: '#ff00ff',
   },
   emptyContainer: {
     flex: 1,
