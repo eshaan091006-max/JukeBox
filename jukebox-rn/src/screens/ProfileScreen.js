@@ -96,9 +96,20 @@ export default function ProfileScreen({ navigation }) {
         } else {
           Alert.alert("Spotify Link", "Connected to Spotify Premium successfully!");
         }
+      } else {
+        if (Platform.OS === 'web') {
+          alert("Exchange failed: " + JSON.stringify(data));
+        } else {
+          Alert.alert("Exchange failed", JSON.stringify(data));
+        }
       }
     } catch (e) {
       console.log("Token exchange error", e);
+      if (Platform.OS === 'web') {
+        alert("Exchange request failed: " + e.message);
+      } else {
+        Alert.alert("Exchange request failed", e.message);
+      }
     }
   };
 

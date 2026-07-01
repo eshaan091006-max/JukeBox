@@ -108,6 +108,10 @@ export default function SearchScreen() {
               },
             });
             const data = await res.json();
+            if (res.status !== 200) {
+              alert("Spotify Search Error " + res.status + ": " + JSON.stringify(data));
+              return;
+            }
             if (data && data.tracks && data.tracks.items) {
               const mapped = data.tracks.items.map(item => ({
                 id: item.id, // Spotify alphanumeric string ID
@@ -122,6 +126,7 @@ export default function SearchScreen() {
             }
           } catch (e) {
             console.log("Spotify search request failed", e);
+            alert("Spotify Search failed: " + e.message);
           }
         };
         searchSpotify();
